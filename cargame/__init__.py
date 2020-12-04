@@ -1,4 +1,5 @@
 import arcade
+from cargame.camera import Camera   
 
 screen_width = 800
 screen_height = 600
@@ -14,6 +15,8 @@ class Main(arcade.Window):
 
         # Set background color as white
         arcade.set_background_color(arcade.color.WHITE)
+        # Camera object
+        self.cam = Camera(screen_width, screen_height)
 
     def on_draw(self):
         """ Will be called everytime the screen is drawn """
@@ -25,6 +28,15 @@ class Main(arcade.Window):
         arcade.draw_circle_filled(
             400, 300, 300, arcade.color.BLUE
         )
+        self.cam.update_viewport()
+
+    def on_mouse_drag(self, x: float, y: float, dx: float, dy: float, buttons: int, modifiers: int):
+        """ Updates the camera if dragged. """
+        if buttons == arcade.MOUSE_BUTTON_RIGHT:
+            self.cam.move_camera_pos(-dx, -dy)
+
+    def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
+        """ Nothing yet """
 
 
 def run_game():
