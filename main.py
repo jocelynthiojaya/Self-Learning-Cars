@@ -1,4 +1,5 @@
-import cargame as g
+import cargame as game
+import cargame.globals as g
 import json
 from os import path
 
@@ -18,4 +19,4 @@ if path.exists(CONF_PATH) and path.isfile(CONF_PATH):
         g.screen_height = j_file.get("window_height", g.screen_height)
 
 # Run the game
-g.run_game()
+game.run_game()
