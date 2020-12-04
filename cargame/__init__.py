@@ -32,10 +32,14 @@ class Main(arcade.Window):
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float, buttons: int, modifiers: int):
         """ Updates the camera if dragged. """
         if buttons == arcade.MOUSE_BUTTON_RIGHT:
-            self.cam.move_camera_pos(-dx, -dy)
+            self.cam.handle_pan(dx, dy)
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         """ Nothing yet """
+
+    def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
+        """ Controls the zoom """
+        self.cam.handle_zoom(x, y, scroll_y)
 
 
 def run_game():
