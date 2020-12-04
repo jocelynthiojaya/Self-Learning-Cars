@@ -1,5 +1,5 @@
 import arcade
-from cargame.camera import Camera
+from cargame.camera import Camera, Grid
 import cargame.globals as g
 
 WINDOW_TITLE = "Self Learning Cars"
@@ -16,6 +16,13 @@ class Main(arcade.Window):
         arcade.set_background_color(arcade.color.WHITE)
         # Camera object
         self.cam = Camera()
+        self.grid = Grid(self.cam)
+
+    def update(self, delta_time: float):
+        """ Will be run every frame """
+        self.cam.on_start_update()
+
+        self.grid.update()
 
     def on_draw(self):
         """ Will be called everytime the screen is drawn """
@@ -24,9 +31,9 @@ class Main(arcade.Window):
         arcade.start_render()
 
         # Draw a blue circle
-        arcade.draw_circle_filled(
-            400, 300, 300, arcade.color.BLUE
-        )
+        arcade.draw_circle_filled(400, 300, 300, arcade.color.BLUE)
+        self.grid.draw_grid()
+
         self.cam.update_viewport()
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float, buttons: int, modifiers: int):
