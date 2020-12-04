@@ -121,11 +121,6 @@ class Grid():
 
     def update(self):
         """ Update """
-        # print(self.camera.moved)
-        # print(self.camera.get_viewport())
-        # if self.camera.moved:
-            # Recreate every line grid
-        self.recreate_grid()
 
     def recreate_grid(self):
         """ Recreate the grid from the ground up
@@ -149,5 +144,10 @@ class Grid():
 
     def draw_grid(self):
         """ Draws the grid based on the configuration """
+
+        # Only update grid when camera is moved.
+        if self.camera.moved:
+            # Recreate every line grid
+            self.recreate_grid()
         
         arcade.draw_lines(self.grid_lines, (220, 220, 220))

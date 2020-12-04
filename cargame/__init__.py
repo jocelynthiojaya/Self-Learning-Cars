@@ -22,8 +22,6 @@ class Main(arcade.Window):
         """ Will be run every frame """
         self.cam.on_start_update()
 
-        self.grid.update()
-
     def on_draw(self):
         """ Will be called everytime the screen is drawn """
 
@@ -32,6 +30,7 @@ class Main(arcade.Window):
 
         # Draw a blue circle
         arcade.draw_circle_filled(400, 300, 300, arcade.color.BLUE)
+
         self.grid.draw_grid()
 
         self.cam.update_viewport()
