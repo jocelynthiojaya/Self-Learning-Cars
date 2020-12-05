@@ -41,11 +41,11 @@ class Camera:
         # Move and do maths
         zoom_mult = zoom_multiplexer(self.zoom)
         if x != None:
-            self.right = x + int(g.screen_width * zoom_mult)
+            self.right = x + g.screen_width * zoom_mult
             self.x = x
 
         if y != None:
-            self.top = y + int(g.screen_height * zoom_mult)
+            self.top = y + g.screen_height * zoom_mult
             self.y = y
 
         # print("Port size: ({}, {}) zoom: {}".format(self.right - self.x, self.top - self.y, self.zoom))
@@ -150,4 +150,4 @@ class Grid():
             # Recreate every line grid
             self.recreate_grid()
         
-        arcade.draw_lines(self.grid_lines, (220, 220, 220))
+        arcade.draw_lines(self.grid_lines, (235, 235, 235))

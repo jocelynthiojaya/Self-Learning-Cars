@@ -1,5 +1,6 @@
 import arcade
 from cargame.camera import Camera, Grid
+from cargame.ui import GameUI
 import cargame.globals as g
 
 WINDOW_TITLE = "Self Learning Cars"
@@ -17,9 +18,11 @@ class Main(arcade.Window):
         # Camera object
         self.cam = Camera()
         self.grid = Grid(self.cam)
+        self.ui = GameUI(self.cam)
         self.fps = 0
         self.fps_text = ""
 
+        # Schedule fps update
         arcade.schedule(self.update_fps_counter, 0.5)
 
     def update(self, delta_time: float):
@@ -29,8 +32,7 @@ class Main(arcade.Window):
     
     def update_fps_counter(self, delta_time):
         """ Used by scheduling to update the fps """
-        print(delta_time)
-        self.fps_text = "FPS: " + str(self.fps)
+        self.fps_text = "FPS: " + str(round(self.fps))
 
     def on_draw(self):
         """ Will be called everytime the screen is drawn """
@@ -39,13 +41,14 @@ class Main(arcade.Window):
         arcade.start_render()
 
         # Draw a blue circle
-        arcade.draw_circle_filled(400, 300, 300, arcade.color.BLUE)
+        arcade.draw_circle_filled(400, 300, 100, arcade.color.BLUE)
 
         # Draws the grid
         self.grid.draw_grid()
 
         # Draws the fps counter
-        arcade.draw_text(self.fps_text, 32, 32, (0, 0, 0), 24)
+        self.ui.set_text(self.fps_text)
+        self.ui.on_draw()
 
         self.cam.update_viewport()
 
