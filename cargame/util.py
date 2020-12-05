@@ -31,3 +31,11 @@ def rotation_matrix(x, y, theta):
     theta must be in radians
     """
     return [np.cos(theta) * x - np.sin(theta) * y, np.sin(theta) * x + np.cos(theta) * y]
+
+def delta_unit(value, delta):
+    """ This will return a value processed according to the delta time frame.
+
+    value: value per second.
+    delta: frame time difference
+    """
+    return value * delta

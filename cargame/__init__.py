@@ -3,6 +3,7 @@ from cargame.camera import Camera, Grid
 from cargame.ui import GameUI
 from cargame.car import Car, CarManager
 import cargame.globals as g
+import cargame.util as util
 
 WINDOW_TITLE = "Self Learning Cars"
 
@@ -32,6 +33,9 @@ class Main(arcade.Window):
         """ Will be run every frame """
         self.cam.on_start_update()
         self.fps = 1/delta_time
+
+        self.car.move_forward(util.delta_unit(100, delta_time))
+        self.car.rotate(self.car.direction + util.delta_unit(30, delta_time))
     
     def update_fps_counter(self, delta_time):
         """ Used by scheduling to update the fps """
@@ -49,7 +53,6 @@ class Main(arcade.Window):
         # Draws the grid
         self.grid.draw_grid()
 
-        self.car.rotate(self.car.direction + 1)
         self.car.on_draw()
 
         # Draws the fps counter

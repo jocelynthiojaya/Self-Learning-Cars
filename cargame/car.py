@@ -6,11 +6,11 @@ class Car:
     """ Car object, with collisions """
 
     car_poly = [
-            [5, 0],
-            [0, 10],
-            [-30, 10],
-            [-30, -10],
-            [0, -10]
+            [30, 0],
+            [25, 10],
+            [-5, 10],
+            [-5, -10],
+            [25, -10]
         ]
 
     def __init__(self, x, y):
@@ -32,12 +32,21 @@ class Car:
         """ Update every frame """
 
     def rotate(self, direction):
-        """ In degrees, rotate the car """
+        """ In degrees, set the car's direction to the value, rotate the car polygons, and 
+        set the forward direction. """
         
         # If the direction is actually different, then rotate the polygons
         if direction != self.direction:
             self.res_poly = [ np.add(rotation_matrix(i, j, np.radians(direction)), [self.x, self.y]) for i, j in Car.car_poly ]
             self.direction = direction
+
+    def move_forward(self, speed):
+        """ Moves the car forward according to the direction. The speed unit is pixels.
+        if speed is minus, then car will move backwards. """
+
+        rad = np.radians(self.direction)
+        self.x += speed * np.cos(rad)
+        self.y += speed * np.sin(rad)
 
     def on_draw(self):
         """ Draw """
