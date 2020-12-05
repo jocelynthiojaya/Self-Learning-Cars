@@ -17,10 +17,20 @@ class Main(arcade.Window):
         # Camera object
         self.cam = Camera()
         self.grid = Grid(self.cam)
+        self.fps = 0
+        self.fps_text = ""
+
+        arcade.schedule(self.update_fps_counter, 0.5)
 
     def update(self, delta_time: float):
         """ Will be run every frame """
         self.cam.on_start_update()
+        self.fps = 1/delta_time
+    
+    def update_fps_counter(self, delta_time):
+        """ Used by scheduling to update the fps """
+        print(delta_time)
+        self.fps_text = "FPS: " + str(self.fps)
 
     def on_draw(self):
         """ Will be called everytime the screen is drawn """
@@ -31,7 +41,11 @@ class Main(arcade.Window):
         # Draw a blue circle
         arcade.draw_circle_filled(400, 300, 300, arcade.color.BLUE)
 
+        # Draws the grid
         self.grid.draw_grid()
+
+        # Draws the fps counter
+        arcade.draw_text(self.fps_text, 32, 32, (0, 0, 0), 24)
 
         self.cam.update_viewport()
 
