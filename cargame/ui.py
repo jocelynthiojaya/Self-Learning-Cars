@@ -1,7 +1,7 @@
 import arcade
 from cargame.camera import Camera
 import cargame.util as util
-import cargame.globals as g
+from cargame.globals import conf
 
 Y_UI_CENTER = 75
 
@@ -27,10 +27,10 @@ class GameUI():
 
         camx, _, camy, _ = arcade.get_viewport()
         # Base UI Rectangle
-        util.draw_rectangle_rounded(camx + g.screen_width/2, camy + Y_UI_CENTER, UI_WIDTH, UI_HEIGHT, 15, (230, 230, 230))
+        util.draw_rectangle_rounded(camx + conf["screen_width"]/2, camy + Y_UI_CENTER, UI_WIDTH, UI_HEIGHT, 15, (230, 230, 230))
         
         # Draw the text container and text
-        text_rect_x = camx + g.screen_width/2 + UI_WIDTH/2 - TEXT_WIDTH/2 - 10
+        text_rect_x = camx + conf["screen_width"]/2 + UI_WIDTH/2 - TEXT_WIDTH/2 - 10
         text_rect_y = camy + Y_UI_CENTER
         arcade.draw_rectangle_outline(text_rect_x, text_rect_y, TEXT_WIDTH, TEXT_HEIGHT, (50, 50, 50))
         arcade.draw_rectangle_filled(text_rect_x, text_rect_y, TEXT_WIDTH, TEXT_HEIGHT, (255, 255, 255))

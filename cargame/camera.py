@@ -1,5 +1,5 @@
 import arcade
-import cargame.globals as g
+from cargame.globals import conf
 from cargame import util
 
 # This math is for getting the ratio from zoom. I honestly
@@ -17,8 +17,8 @@ class Camera:
         """
         self.x = 0
         self.y = 0
-        self.right = g.screen_width
-        self.top = g.screen_height
+        self.right = conf["screen_width"]
+        self.top = conf["screen_height"]
 
         # Camera bounds
         self.left_bound = left_bound
@@ -66,11 +66,11 @@ class Camera:
         # Move and do maths
         zoom_mult = zoom_multiplexer(self.zoom)
         if x != None:
-            self.right = x + g.screen_width * zoom_mult
+            self.right = x + conf["screen_width"] * zoom_mult
             self.x = x
 
         if y != None:
-            self.top = y + g.screen_height * zoom_mult
+            self.top = y + conf["screen_height"] * zoom_mult
             self.y = y
 
         self.handle_border()
@@ -87,17 +87,17 @@ class Camera:
         
         # Get the linear interpolation so that the zoom is
         # focused on the anchor
-        x_lerp = util.invlerp(0, g.screen_width, anchor_x)
-        y_lerp = util.invlerp(0, g.screen_height, anchor_y)
+        x_lerp = util.invlerp(0, conf["screen_width"], anchor_x)
+        y_lerp = util.invlerp(0, conf["screen_height"], anchor_y)
 
         # print("x: {} y: {} right: {} top: {}".format(self.x, self.y, self.right, self.top))
         # print("xlerp: {} ylerp: {}".format(x_lerp, y_lerp))
         
         # Camera view ports
-        lp = self.x - (x_lerp * g.screen_width * zoom_inc) / 2
-        bp = self.y - (y_lerp * g.screen_height * zoom_inc) / 2
-        rp = self.right + ((1-x_lerp) * g.screen_width * zoom_inc) / 2
-        tp = self.top + ((1-y_lerp) * g.screen_height * zoom_inc) / 2
+        lp = self.x - (x_lerp * conf["screen_width"] * zoom_inc) / 2
+        bp = self.y - (y_lerp * conf["screen_height"] * zoom_inc) / 2
+        rp = self.right + ((1-x_lerp) * conf["screen_width"] * zoom_inc) / 2
+        tp = self.top + ((1-y_lerp) * conf["screen_height"] * zoom_inc) / 2
 
         # If camera view port is within the bounds, do the zoom.
         if (rp - lp) < (self.right_bound - self.left_bound) and (tp - bp) < (self.top_bound - self.bottom_bound):
@@ -185,5 +185,5 @@ class Grid():
         if self.camera.moved:
             # Recreate every line grid
             self.recreate_grid()
-        
+
         arcade.draw_lines(self.grid_lines, (235, 235, 235))

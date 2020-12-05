@@ -3,7 +3,7 @@ from cargame.camera import Camera, Grid
 from cargame.ui import GameUI
 from cargame.car import Car, CarManager
 from cargame.track import Track, TrackManager
-import cargame.globals as g
+from cargame.globals import conf
 import cargame.util as util
 
 WINDOW_TITLE = "Self Learning Cars"
@@ -14,12 +14,17 @@ class Main(arcade.Window):
     def __init__(self):
         """ Initialize the window """
         # Create the object
-        super().__init__(g.screen_width, g.screen_height, WINDOW_TITLE)
+        super().__init__(conf["screen_width"], conf["screen_height"], WINDOW_TITLE)
 
         # Set background color as white
         arcade.set_background_color(arcade.color.WHITE)
         # Camera object
-        self.cam = Camera(-4000, -4000, 4000, 4000)
+        self.cam = Camera(
+            conf["c_bound_left"],
+            conf["c_bound_bottom"],
+            conf["c_bound_right"],
+            conf["c_bound_top"]
+        )
         self.grid = Grid(self.cam)
         self.ui = GameUI(self.cam)
 
