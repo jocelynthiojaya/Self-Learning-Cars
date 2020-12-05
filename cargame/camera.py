@@ -82,6 +82,9 @@ class Camera:
         # Mark camera as moved
         self.moved = True
 
+        # Clamp the zoom
+        zoom = util.clamp(zoom, -5.0, 2.95)
+
         # Calculate zoom increment
         zoom_inc = self.zoom - zoom
         

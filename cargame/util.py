@@ -39,3 +39,7 @@ def delta_unit(value, delta):
     delta: frame time difference
     """
     return value * delta
+
+def clamp(n, smallest, largest):
+    """ Clamps the number """
+    return max(smallest, min(n, largest))
