@@ -1,4 +1,5 @@
 import arcade
+import numpy as np
 
 def invlerp(a, b, v):
     """ Inverse lerp.
@@ -24,3 +25,9 @@ def draw_rectangle_rounded(center_x, center_y, width, height, radius, color):
     arcade.draw_circle_filled(center_x - width/2 + radius, center_y + height/2 - radius, radius, color)
     arcade.draw_circle_filled(center_x + width/2 - radius, center_y - height/2 + radius, radius, color)
     arcade.draw_circle_filled(center_x + width/2 - radius, center_y + height/2 - radius, radius, color)
+
+def rotation_matrix(x, y, theta):
+    """ Calculate the rotation matrix. Origin is assumed to be (0, 0)
+    theta must be in radians
+    """
+    return [np.cos(theta) * x - np.sin(theta) * y, np.sin(theta) * x + np.cos(theta) * y]
