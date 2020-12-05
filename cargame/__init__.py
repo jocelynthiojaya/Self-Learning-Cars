@@ -2,6 +2,7 @@ import arcade
 from cargame.camera import Camera, Grid
 from cargame.ui import GameUI
 from cargame.car import Car, CarManager
+from cargame.track import Track, TrackManager
 import cargame.globals as g
 import cargame.util as util
 
@@ -21,10 +22,22 @@ class Main(arcade.Window):
         self.cam = Camera()
         self.grid = Grid(self.cam)
         self.ui = GameUI(self.cam)
-        self.car_manager = CarManager()
-        self.car = Car(200, 200)
+
         self.fps = 0
         self.fps_text = ""
+
+        self.car_manager = CarManager()
+        self.car = Car(200, 200)
+        self.track = Track([
+            [150, 150],
+            [500, 150],
+            [700, 300],
+            [1100, 300],
+            [1100, 400],
+            [650, 400],
+            [450, 250],
+            [150, 250]
+        ])
 
         # Schedule fps update
         arcade.schedule(self.update_fps_counter, 0.5)
@@ -47,11 +60,10 @@ class Main(arcade.Window):
         # Clear the screen and start drawing
         arcade.start_render()
 
-        # Draw a blue circle
-        arcade.draw_circle_filled(400, 300, 100, arcade.color.BLUE)
-
         # Draws the grid
         self.grid.draw_grid()
+
+        self.track.on_draw()
 
         self.car.on_draw()
 
