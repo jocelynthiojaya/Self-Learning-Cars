@@ -19,7 +19,7 @@ class Main(arcade.Window):
         # Set background color as white
         arcade.set_background_color(arcade.color.WHITE)
         # Camera object
-        self.cam = Camera()
+        self.cam = Camera(-4000, -4000, 4000, 4000)
         self.grid = Grid(self.cam)
         self.ui = GameUI(self.cam)
 

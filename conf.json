@@ -1,4 +1,8 @@
 {
     "window_width": 800,
-    "window_height": 600
+    "window_height": 600,
+    "canvas_bound_left": -4000,
+    "canvas_bound_bottom": -4000,
+    "canvas_bound_right": 4000,
+    "canvas_bound_top": 4000
 }

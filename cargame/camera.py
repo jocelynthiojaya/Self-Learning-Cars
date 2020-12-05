@@ -10,7 +10,7 @@ zoom_multiplexer = lambda x : (3 - x)/2
 # TODO: Implement anchor
 class Camera:
 
-    def __init__(self):
+    def __init__(self, left_bound, bottom_bound, right_bound, top_bound):
         """ Set every camera variables
         s_width: Screen width
         s_height: Screen height
@@ -19,6 +19,12 @@ class Camera:
         self.y = 0
         self.right = g.screen_width
         self.top = g.screen_height
+
+        # Camera bounds
+        self.left_bound = left_bound
+        self.bottom_bound = bottom_bound
+        self.right_bound = right_bound
+        self.top_bound = top_bound
 
         # The zoom of the main canvas
         self.zoom = 1
@@ -29,6 +35,25 @@ class Camera:
     def on_start_update(self):
         """ Will be run at the beginning of them main update function """
         self.moved = False
+
+    def handle_border(self):
+        """ Handles if the camera went out of bounds """
+
+        bound_left = self.x < self.left_bound
+        bound_right = self.right > self.right_bound
+        if bound_left or bound_right:
+
+            x_diff = self.left_bound - self.x if bound_left else self.right_bound - self.right
+            self.x += x_diff
+            self.right += x_diff
+
+        bound_bot = self.y < self.bottom_bound
+        bound_top = self.top > self.top_bound
+        if bound_bot or bound_top:
+
+            y_diff = self.bottom_bound - self.y if bound_bot else self.top_bound - self.top
+            self.y += y_diff
+            self.top += y_diff
 
     def update_camera_pos(self, x=None, y=None, zoom=None):
         """
@@ -48,6 +73,7 @@ class Camera:
             self.top = y + g.screen_height * zoom_mult
             self.y = y
 
+        self.handle_border()
         # print("Port size: ({}, {}) zoom: {}".format(self.right - self.x, self.top - self.y, self.zoom))
 
     def update_zoom(self, zoom, anchor_x, anchor_y):
@@ -66,14 +92,24 @@ class Camera:
 
         # print("x: {} y: {} right: {} top: {}".format(self.x, self.y, self.right, self.top))
         # print("xlerp: {} ylerp: {}".format(x_lerp, y_lerp))
+        
+        # Camera view ports
+        lp = self.x - (x_lerp * g.screen_width * zoom_inc) / 2
+        bp = self.y - (y_lerp * g.screen_height * zoom_inc) / 2
+        rp = self.right + ((1-x_lerp) * g.screen_width * zoom_inc) / 2
+        tp = self.top + ((1-y_lerp) * g.screen_height * zoom_inc) / 2
 
-        # Calculate the camera maths here
-        self.x = self.x - (x_lerp * g.screen_width * zoom_inc) / 2
-        self.y = self.y - (y_lerp * g.screen_height * zoom_inc) / 2
-        self.right = self.right + ((1-x_lerp) * g.screen_width * zoom_inc) / 2
-        self.top = self.top + ((1-y_lerp) * g.screen_height * zoom_inc) / 2
+        # If camera view port is within the bounds, do the zoom.
+        if (rp - lp) < (self.right_bound - self.left_bound) and (tp - bp) < (self.top_bound - self.bottom_bound):
 
-        self.zoom = round(zoom, 3)
+            # Calculate the camera maths here
+            self.x = lp
+            self.y = bp
+            self.right = rp
+            self.top = tp
+
+            self.zoom = round(zoom, 3)
+            self.handle_border()
         # print("x: {} y: {} right: {} top: {}".format(self.x, self.y, self.right, self.top))
         # print("Port size: ({}, {}) zoom: {}".format(self.right - self.x, self.top - self.y, self.zoom))
 
