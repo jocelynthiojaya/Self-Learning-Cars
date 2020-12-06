@@ -55,6 +55,8 @@ class Main(arcade.Window):
 
         self.car.move_forward(util.delta_unit(100, delta_time))
         self.car.rotate(self.car.direction + util.delta_unit(30, delta_time))
+
+        self.car.update()
     
     def update_fps_counter(self, delta_time):
         """ Used by scheduling to update the fps """

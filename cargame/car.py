@@ -16,10 +16,17 @@ class Car:
     def __init__(self, x, y):
         """ Inits the car """
         # The coordinates of the origin point
+
+        # all the variables with the f (future) prefix is to keep track of the
+        # value after moving it.
+        # Useful for collision detection.
+        self.fx = 0
         self.x = x
+        self.fy = 0
         self.y = y
 
         # 90 is up, 0 is right.
+        self.fdirection = 0
         self.direction = 0
 
         # Result poly, this will be drawn.
@@ -36,20 +43,61 @@ class Car:
         # Whether the bounding box changes
         self.bounds_changed = True
 
+        # Whether the car is moved.
+        self.moved = False
+
     def update(self):
         """ Update every frame """
+
+        # Script will only be run if object is moved.
+        if self.moved:
+            self.handle_movement()
+            self.moved = False
+
+    def handle_movement(self):
+        """ Script to handle movement with futures and collisions """
+
+        # First, move the car into position on which we want to check the collision
+        future_poly = None
+
+        # If direction is changed, then run the rotation matrix poly. If not, just translation.
+        if self.fdirection != self.direction:
+            # Translation and rotation matrix
+            future_poly = [ np.add(rotation_matrix(i, j, np.radians(self.fdirection)), [self.x, self.y]) for i, j in Car.car_poly ]
+        else:
+            # Do normal translation
+            future_poly = np.add([self.fx, self.fy], Car.car_poly)
+            
+        # Detects for collisions with the future values
+        # TODO: Change the True statement into a collision checking algorithm.
+        if True:
+            self.x = self.fx
+            self.y = self.fy
+            self.direction = self.fdirection
+            self.res_poly = future_poly
+        else:
+            # If collision is detected then reset the future value.
+            # Do the on collision script
+            self.on_collision()
+            self.fx = self.x
+            self.fy = self.y
+            self.fdirection = self.direction
+
+    def on_collision(self):
+        """ Will be run if collision is detected. """
 
     def rotate(self, direction):
         """ In degrees, set the car's direction to the value, rotate the car polygons, and 
         set the forward direction. """
         
         # If the direction is actually different, then rotate the polygons
-        if direction != self.direction:
-            self.res_poly = [ np.add(rotation_matrix(i, j, np.radians(direction)), [self.x, self.y]) for i, j in Car.car_poly ]
-            self.direction = direction
+        self.fdirection = direction
 
         # Set bounding box to change
         self.bounds_changed = True
+
+        # Set marker to move
+        self.moved = True
 
     def move_forward(self, speed):
         """ Moves the car forward according to the direction. The speed unit is pixels.
@@ -57,20 +105,25 @@ class Car:
 
         # Appends the speed according to the direction
         rad = np.radians(self.direction)
-        self.x += speed * np.cos(rad)
-        self.y += speed * np.sin(rad)
+        self.fx += speed * np.cos(rad)
+        self.fy += speed * np.sin(rad)
 
-        self.res_poly = np.add([self.x, self.y], Car.car_poly)
+        # Set marker to move
+        self.moved = True
 
     def on_draw(self):
         """ Draw """
         arcade.draw_polygon_filled(self.res_poly, arcade.color.BLUE_SAPPHIRE)
         self.draw_bounding_box()
 
-    def get_bounding_box(self):
+    def get_bounding_box(self, poly=None):
         """ Gets the bounding box of the polygons. (Updates it if necessary)
+        :poly: use a custom polygon for the bounding box. If not supplied, use the result poly.
         :return -> [xmin, ymin, xmax, ymax] """
 
+        use_poly = poly if poly else self.res_poly
+
+        # TODO: Test to comply with future values.
         # Updates the bounds
         if self.bounds_changed:
             # Gets the minimum and maximum value of each bounds.
@@ -79,7 +132,7 @@ class Car:
             self.xmax = float('-inf')
             self.ymax = float('-inf')
 
-            for points in self.res_poly:
+            for points in use_poly:
                 x = points[0] - self.x
                 y = points[1] - self.y
 
