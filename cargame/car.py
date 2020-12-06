@@ -1,6 +1,7 @@
 import arcade
 import numpy as np
-from cargame.util import rotation_matrix
+from cargame.util import rotation_matrix, delta_unit, clamp
+import cargame.globals as g
 
 class Car:
     """ Car object, with collisions """
@@ -12,6 +13,8 @@ class Car:
             [-5, -10],
             [25, -10]
         ]
+
+    car_maxturnrate = 120
 
     def __init__(self, x, y):
         """ Inits the car """
@@ -46,6 +49,10 @@ class Car:
         # Whether the car is moved.
         self.moved = False
 
+        # Turn rate
+        # -1.0 = left, 0 = straight, 1.0 = right
+        self.wheel_turn = 0
+
     def update(self):
         """ Update every frame """
 
@@ -56,6 +63,9 @@ class Car:
 
     def handle_movement(self):
         """ Script to handle movement with futures and collisions """
+
+        # Handle the turn
+        self.rotate(self.direction - self.wheel_turn * delta_unit(Car.car_maxturnrate))
 
         # First, move the car into position on which we want to check the collision
         future_poly = None
@@ -91,19 +101,29 @@ class Car:
         set the forward direction. """
         
         # If the direction is actually different, then rotate the polygons
-        self.fdirection = direction
+        if direction != self.direction:
+            self.fdirection = direction
 
-        # Set bounding box to change
-        self.bounds_changed = True
+            # Set bounding box to change
+            self.bounds_changed = True
 
-        # Set marker to move
-        self.moved = True
+            # Set marker to move
+            self.moved = True
+        
+    def set_wheel(self, wheel):
+        """ Sets the wheel's direction.
+        -1.0 = left
+        0 = straight
+        1.0 = right
+        """
+        self.wheel_turn = clamp(wheel, -1, 1)
 
     def move_forward(self, speed):
         """ Moves the car forward according to the direction. The speed unit is pixels.
         if speed is minus, then car will move backwards. """
 
         # Appends the speed according to the direction
+        
         rad = np.radians(self.direction)
         self.fx += speed * np.cos(rad)
         self.fy += speed * np.sin(rad)

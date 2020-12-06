@@ -3,7 +3,7 @@ from cargame.camera import Camera, Grid
 from cargame.ui import GameUI
 from cargame.car import Car, CarManager
 from cargame.track import Track, TrackManager
-from cargame.globals import conf
+import cargame.globals as g
 import cargame.util as util
 
 WINDOW_TITLE = "Self Learning Cars"
@@ -14,21 +14,20 @@ class Main(arcade.Window):
     def __init__(self):
         """ Initialize the window """
         # Create the object
-        super().__init__(conf["screen_width"], conf["screen_height"], WINDOW_TITLE)
+        super().__init__(g.conf["screen_width"], g.conf["screen_height"], WINDOW_TITLE)
 
         # Set background color as white
         arcade.set_background_color(arcade.color.WHITE)
         # Camera object
         self.cam = Camera(
-            conf["c_bound_left"],
-            conf["c_bound_bottom"],
-            conf["c_bound_right"],
-            conf["c_bound_top"]
+            g.conf["c_bound_left"],
+            g.conf["c_bound_bottom"],
+            g.conf["c_bound_right"],
+            g.conf["c_bound_top"]
         )
         self.grid = Grid(self.cam)
         self.ui = GameUI(self.cam)
 
-        self.fps = 0
         self.fps_text = ""
 
         self.car_manager = CarManager()
@@ -50,17 +49,20 @@ class Main(arcade.Window):
 
     def update(self, delta_time: float):
         """ Will be run every frame """
+        # Update the camera at the start
         self.cam.on_start_update()
-        self.fps = 1/delta_time
+        
+        # Updates the delta time on globals
+        g.delta = delta_time
 
-        self.car.move_forward(util.delta_unit(100, delta_time))
-        self.car.rotate(self.car.direction + util.delta_unit(30, delta_time))
+        self.car.move_forward(util.delta_unit(100))
+        self.car.set_wheel(1)
 
         self.car.update()
     
     def update_fps_counter(self, delta_time):
         """ Used by scheduling to update the fps """
-        self.fps_text = "FPS: " + str(round(self.fps))
+        self.fps_text = "FPS: " + str(round(1/g.delta))
 
     def on_draw(self):
         """ Will be called everytime the screen is drawn """
