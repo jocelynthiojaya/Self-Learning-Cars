@@ -40,6 +40,10 @@ def delta_unit(value, delta):
     """
     return value * delta
 
-def clamp(n, smallest, largest):
+def clamp(val, min, max):
     """ Clamps the number """
-    return max(smallest, min(n, largest))
+    if val > max:
+        return max
+    elif val < min:
+        return min
+    return val

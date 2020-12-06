@@ -41,7 +41,8 @@ class Main(arcade.Window):
             [1100, 400],
             [650, 400],
             [450, 250],
-            [150, 250]
+            [150, 250],
+            [150, 150]
         ])
 
         # Schedule fps update
