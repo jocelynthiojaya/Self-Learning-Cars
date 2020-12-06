@@ -2,7 +2,7 @@ import arcade
 from cargame.camera import Camera, Grid
 from cargame.ui import GameUI
 from cargame.car import Car, CarManager
-from cargame.track import Track, TrackManager
+from cargame.track import TrackManager
 import cargame.globals as g
 import cargame.util as util
 
@@ -45,6 +45,10 @@ class Main(arcade.Window):
             [150, 250],
             [150, 150]
         ])
+        self.track_manager.add_track([
+            [0, 0],
+            [256, 256]
+        ])
 
         # Schedule fps update
         arcade.schedule(self.update_fps_counter, 0.5)
@@ -58,7 +62,7 @@ class Main(arcade.Window):
         g.delta = delta_time
 
         self.car.move_forward(util.delta_unit(100))
-        self.car.set_wheel(0)
+        self.car.set_wheel(0.5)
 
         self.car.update()
     
