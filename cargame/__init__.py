@@ -39,16 +39,20 @@ class Main(arcade.Window):
             [500, 150],
             [700, 300],
             [1100, 300],
-            [1100, 400],
+            [1400, 0],
+            [1900, 0],
+            [1900, 150],
+            [1400, 150],
+            [1150, 400],
             [650, 400],
             [450, 250],
             [150, 250],
             [150, 150]
         ])
-        self.track_manager.add_track([
-            [0, 0],
-            [256, 256]
-        ])
+        # self.track_manager.add_track([
+        #     [0, 0],
+        #     [256, 256]
+        # ])
 
         # Schedule fps update
         arcade.schedule(self.update_fps_counter, 0.5)
