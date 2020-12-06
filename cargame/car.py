@@ -23,9 +23,9 @@ class Car:
         # all the variables with the f (future) prefix is to keep track of the
         # value after moving it.
         # Useful for collision detection.
-        self.fx = 0
+        self.fx = x
         self.x = x
-        self.fy = 0
+        self.fy = y
         self.y = y
 
         # 90 is up, 0 is right.

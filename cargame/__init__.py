@@ -32,7 +32,9 @@ class Main(arcade.Window):
 
         self.car_manager = CarManager()
         self.car = Car(200, 200)
-        self.track = Track([
+
+        self.track_manager = TrackManager()
+        self.track_manager.add_track([
             [150, 150],
             [500, 150],
             [700, 300],
@@ -56,7 +58,7 @@ class Main(arcade.Window):
         g.delta = delta_time
 
         self.car.move_forward(util.delta_unit(100))
-        self.car.set_wheel(1)
+        self.car.set_wheel(0)
 
         self.car.update()
     
@@ -73,7 +75,8 @@ class Main(arcade.Window):
         # Draws the grid
         self.grid.draw_grid()
 
-        self.track.on_draw()
+        # Draw the track manager
+        self.track_manager.on_draw()
 
         self.car.on_draw()
 
