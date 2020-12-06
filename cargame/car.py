@@ -23,9 +23,11 @@ class Car:
         self.direction = 0
 
         # Result poly, this will be drawn.
-        self.res_poly = [ [i + x, j + y] for i, j in Car.car_poly ]
+        self.res_poly = np.add([x, y], Car.car_poly)
 
         # The bounding box variables
+        # Note: The bounding box is relative to 0. Not yet appended with the
+        # current coordinate.
         self.xmin = 0
         self.ymin = 0
         self.xmax = 0
@@ -53,6 +55,7 @@ class Car:
         """ Moves the car forward according to the direction. The speed unit is pixels.
         if speed is minus, then car will move backwards. """
 
+        # Appends the speed according to the direction
         rad = np.radians(self.direction)
         self.x += speed * np.cos(rad)
         self.y += speed * np.sin(rad)
@@ -68,6 +71,7 @@ class Car:
         """ Gets the bounding box of the polygons. (Updates it if necessary)
         :return -> [xmin, ymin, xmax, ymax] """
 
+        # Updates the bounds
         if self.bounds_changed:
             # Gets the minimum and maximum value of each bounds.
             self.xmin = float('inf')
@@ -101,6 +105,7 @@ class Car:
         # Gets the bounding box
         xmin, ymin, xmax, ymax = self.get_bounding_box()
 
+        # Gets the actual coordinates
         width = xmax - xmin
         height = ymax - ymin
         center_x = xmin + (width)/2
