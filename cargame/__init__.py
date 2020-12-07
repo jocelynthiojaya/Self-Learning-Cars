@@ -66,7 +66,7 @@ class Main(arcade.Window):
         g.delta = delta_time
 
         self.car_manager.cars[0].move_forward(util.delta_unit(100))
-        self.car_manager.cars[0].set_wheel(0.5)
+        self.car_manager.cars[0].set_wheel(-0.043)
 
         self.car_manager.update()
     

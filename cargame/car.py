@@ -235,13 +235,22 @@ class CarManager:
                     # Iterate every collidable object in the coll_dict and in the coll_dict of track manager.
                     
                     # If a collision has not been confirmed yet, then check it.
+                    # Track collision
                     if not collision:
-                        for obj in self.coll_dict.get((i, j), []) + self.trackmanager.coll_dict.get((i, j), []):
+                        for obj in self.trackmanager.coll_dict.get((i, j), []):
+                            # Check the AABB of the current car and the destination object
+                            if col.rectrect(x1, y1, x2, y2, *col.correct_bounding_box(obj[0], obj[1], obj[2], obj[3])):
+                                # AABB collision detected
+                                if col.linepoly(obj[0], obj[1], obj[2], obj[3], f_poly):
+                                    collision = True
+                                break
+                    # Car collision
+                    if not collision:
+                        for obj in self.coll_dict.get((i, j), []):
                             # Check the AABB of the current car and the destination object
                             if col.rectrect(x1, y1, x2, y2, obj[0], obj[1], obj[2], obj[3]):
                                 # AABB collision detected
-                                # TODO: Do the narrow phase collision
-                                if True:
+                                if col.polypoly(f_poly, obj.res_poly):
                                     collision = True
                                 break
                     
