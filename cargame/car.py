@@ -85,13 +85,16 @@ class Car:
     def get_future_poly(self):
         """ Gets the future poly """
         # If direction is changed, then run the rotation matrix poly. If not, just translation.
-        # TODO: Don't use numpy
         if self.fdirection != self.direction:
             # Translation and rotation matrix
-            return[ np.add(rotation_matrix(i, j, np.radians(self.fdirection)), [self.fx, self.fy]) for i, j in Car.car_poly ]
+            new_poly = []
+            for x, y in Car.car_poly:
+                rot = rotation_matrix(x, y, np.radians(self.fdirection))
+                new_poly.append([rot[0] + self.fx, rot[1] + self.fy])
+            return new_poly
         else:
             # Do normal translation
-            return np.add([self.fx, self.fy], Car.car_poly).tolist()
+            return [ [self.fx + x, self.fy + y] for x, y in Car.car_poly ]
 
     def on_collision(self):
         """ Will be run if collision is detected. """
