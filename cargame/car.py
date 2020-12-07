@@ -1,6 +1,7 @@
 import arcade
 import numpy as np
 from cargame.util import rotation_matrix, delta_unit, clamp
+import cargame.collision as col
 import cargame.globals as g
 
 class Car:
@@ -55,43 +56,42 @@ class Car:
 
     def update(self):
         """ Update every frame """
+        # TODO: Put AI Code here.
 
-        # Script will only be run if object is moved.
-        if self.moved:
-            self.handle_movement()
-            self.moved = False
-
-    def handle_movement(self):
-        """ Script to handle movement with futures and collisions """
-
+        # Handle rotation and movements
         # Handle the turn
         self.rotate(self.direction - self.wheel_turn * delta_unit(Car.car_maxturnrate))
 
-        # First, move the car into position on which we want to check the collision
-        future_poly = None
+    def handle_movement(self, future_poly=None):
+        """ Script to handle movement with futures and collisions.
+        If future poly is None, then the car does not move.
+        If it is not empty, then car will be moved to the current polygon """
 
-        # If direction is changed, then run the rotation matrix poly. If not, just translation.
-        if self.fdirection != self.direction:
-            # Translation and rotation matrix
-            future_poly = [ np.add(rotation_matrix(i, j, np.radians(self.fdirection)), [self.x, self.y]) for i, j in Car.car_poly ]
-        else:
-            # Do normal translation
-            future_poly = np.add([self.fx, self.fy], Car.car_poly)
-            
-        # Detects for collisions with the future values
-        # TODO: Change the True statement into a collision checking algorithm.
-        if True:
-            self.x = self.fx
-            self.y = self.fy
-            self.direction = self.fdirection
-            self.res_poly = future_poly
-        else:
+        if not future_poly:
             # If collision is detected then reset the future value.
             # Do the on collision script
             self.on_collision()
             self.fx = self.x
             self.fy = self.y
             self.fdirection = self.direction
+        else:
+            # If no collision, then replace the current poly with the new poly
+            self.x = self.fx
+            self.y = self.fy
+            self.direction = self.fdirection
+            self.res_poly = future_poly
+            
+
+    def get_future_poly(self):
+        """ Gets the future poly """
+        # If direction is changed, then run the rotation matrix poly. If not, just translation.
+        # TODO: Don't use numpy
+        if self.fdirection != self.direction:
+            # Translation and rotation matrix
+            return[ np.add(rotation_matrix(i, j, np.radians(self.fdirection)), [self.fx, self.fy]) for i, j in Car.car_poly ]
+        else:
+            # Do normal translation
+            return np.add([self.fx, self.fy], Car.car_poly).tolist()
 
     def on_collision(self):
         """ Will be run if collision is detected. """
@@ -189,3 +189,74 @@ class Car:
 
 class CarManager:
     """ Contains many car """
+
+    def __init__(self, trackmanager):
+        """ Inits the Carmanager, needs a trackmanager as a parameter to calculate the collisions"""
+
+        self.trackmanager = trackmanager
+
+        # Cars that this car manager contains
+        self.cars = []
+
+        # The collision dictionary
+        self.coll_dict = {}
+
+    def insert_car(self, car):
+        self.cars.append(car)
+
+    def update_cars(self):
+        """ Does all the collision algorithms for the car, and the update mechanism with the track also. """
+        """ Reconstructs and handles the collision on the fly, to be more efficient """
+        self.coll_dict = {}
+
+        for car in self.cars:
+            # Update the car vars
+            car.update()
+            
+            # Get the future polygon, and use it for collision
+            f_poly = car.get_future_poly()
+
+            # First, based on the car's bounding box insert it into the coll_dict.
+            x1, y1, x2, y2 = col.poly_bounding_box(f_poly)
+
+            # Whether the car is colliding or not.
+            collision = False
+
+            ## Checks and inserts the bounding box into the grids that it overlaps
+            # Grid size
+            size = g.conf["col_grid_size"]
+            # Gets all the grid it consumes
+            for i in range(int(x1 // size), int(x2 // size + 1)):
+                for j in range(int(y1 // size), int(y2 // size + 1)):
+                    # Check the collision first
+                    # Iterate every collidable object in the coll_dict and in the coll_dict of track manager.
+                    
+                    # If a collision has not been confirmed yet, then check it.
+                    if not collision:
+                        for obj in self.coll_dict.get((i, j), []) + self.trackmanager.coll_dict.get((i, j), []):
+                            # Check the AABB of the current car and the destination object
+                            if col.rectrect(x1, y1, x2, y2, obj[0], obj[1], obj[2], obj[3]):
+                                # AABB collision detected
+                                # TODO: Do the narrow phase collision
+                                if True:
+                                    collision = True
+                                break
+                    
+                    # Insert into grid.
+                    if (i, j) not in self.coll_dict:
+                        self.coll_dict[(i, j)] = [[x1, y1, x2, y2]]
+                    else:
+                        self.coll_dict[(i, j)].append([x1, y1, x2, y2])
+
+            # Move the car if collision is not detected.
+            if not collision:
+                car.handle_movement(f_poly)
+            else:
+                car.handle_movement()
+    
+    def update(self):
+        self.update_cars()
+
+    def on_draw(self):
+        for car in self.cars:
+            car.on_draw()

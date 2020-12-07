@@ -30,9 +30,6 @@ class Main(arcade.Window):
 
         self.fps_text = ""
 
-        self.car_manager = CarManager()
-        self.car = Car(200, 200)
-
         self.track_manager = TrackManager()
         self.track_manager.add_track([
             [150, 150],
@@ -54,6 +51,9 @@ class Main(arcade.Window):
         #     [256, 256]
         # ])
 
+        self.car_manager = CarManager(self.track_manager)
+        self.car_manager.insert_car(Car(200, 200))
+
         # Schedule fps update
         arcade.schedule(self.update_fps_counter, 0.5)
 
@@ -65,10 +65,10 @@ class Main(arcade.Window):
         # Updates the delta time on globals
         g.delta = delta_time
 
-        self.car.move_forward(util.delta_unit(100))
-        self.car.set_wheel(0.5)
+        self.car_manager.cars[0].move_forward(util.delta_unit(100))
+        self.car_manager.cars[0].set_wheel(0.5)
 
-        self.car.update()
+        self.car_manager.update()
     
     def update_fps_counter(self, delta_time):
         """ Used by scheduling to update the fps """
@@ -86,7 +86,7 @@ class Main(arcade.Window):
         # Draw the track manager
         self.track_manager.on_draw()
 
-        self.car.on_draw()
+        self.car_manager.on_draw()
 
         # Draws the fps counter
         self.ui.set_text(self.fps_text)
