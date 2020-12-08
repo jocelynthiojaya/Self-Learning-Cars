@@ -14,7 +14,6 @@ Group effort by
 ```
 
 
-
 ## Instructions
 
 1.  Clone project and change directory
@@ -32,3 +31,10 @@ python -m venv venv
 venv/Scripts/activate
 pip install -r requirements.txt
 ```
+
+4. Run the simulation!
+```bash
+python main.py
+```
+
+If a conf.json file is not available, the program will try to make a filled conf.json in the same directory as the main file.
