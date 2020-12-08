@@ -289,7 +289,7 @@ class CarManager:
                                     collision = True
                                 break
                     # Car collision
-                    if (not collision) and self.car_coll:
+                    if self.car_coll and not collision:
                         for obj in self.coll_dict.get((i, j), []):
                             # Check the AABB of the current car and the destination object
                             if col.rectrect(x1, y1, x2, y2, obj[0], obj[1], obj[2], obj[3]):

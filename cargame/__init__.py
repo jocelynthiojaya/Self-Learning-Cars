@@ -53,6 +53,7 @@ class Main(arcade.Window):
 
         self.car_manager = CarManager(self.track_manager)
         self.car_manager.insert_car(Car(200, 200))
+        self.car_manager.insert_car(Car(220, 210))
 
         # Schedule fps update
         arcade.schedule(self.update_fps_counter, 0.5)
@@ -67,6 +68,8 @@ class Main(arcade.Window):
 
         self.car_manager.cars[0].move_forward(util.delta_unit(100))
         self.car_manager.cars[0].set_wheel(-0.043)
+        self.car_manager.cars[1].move_forward(util.delta_unit(80))
+        self.car_manager.cars[1].set_wheel(-0.033)
 
         self.car_manager.update()
     
