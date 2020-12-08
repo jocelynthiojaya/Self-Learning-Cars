@@ -167,7 +167,7 @@ class Car:
         arcade.draw_polygon_filled(self.res_poly, self.car_color)
         arcade.draw_polygon_outline(self.res_poly,  Car.outline_col)
         self.draw_bounding_box()
-        arcade.draw_lines(self.res_sensor, (50, 50, 50, 30))
+        arcade.draw_lines(self.res_sensor, (50, 50, 50, 50))
 
     def get_bounding_box(self, poly=None):
         """ Gets the bounding box of the polygons. (Updates it if necessary)
@@ -237,6 +237,12 @@ class CarManager:
 
         # The collision dictionary
         self.coll_dict = {}
+        
+        # If sensor point is enabled
+        self.draw_sensor = True
+
+        # Store sensor collision points here for drawing.
+        self.collision_points = []
 
     def insert_car(self, car):
         self.cars.append(car)
@@ -245,6 +251,8 @@ class CarManager:
         """ Does all the collision algorithms for the car, and the update mechanism with the track also. """
         """ Reconstructs and handles the collision on the fly, to be more efficient """
         if self.car_coll: self.coll_dict = {}
+
+        if self.draw_sensor: self.collision_points = []
 
         # Grid size
         size = g.conf["col_grid_size"]
@@ -328,6 +336,7 @@ class CarManager:
                                 if intersection:
                                     # Add the sensor data to the car object.
                                     car.sensors[s] = distance(sensor[0], sensor[1], *intersection, True)
+                                    if self.draw_sensor: self.collision_points.append(intersection)
 
                         # If enabled, detect car collision here
                         if self.car_coll:
@@ -340,3 +349,6 @@ class CarManager:
     def on_draw(self):
         for car in self.cars:
             car.on_draw()
+
+        if self.draw_sensor:
+            arcade.draw_points(self.collision_points, arcade.color.RED, 5)
