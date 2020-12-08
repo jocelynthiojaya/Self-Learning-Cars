@@ -1,6 +1,6 @@
 import arcade
 import numpy as np
-from cargame.util import rotation_matrix, delta_unit, clamp
+from cargame.util import rotation_matrix, delta_unit, clamp, distance
 import cargame.collision as col
 import cargame.globals as g
 from time import time
@@ -71,6 +71,11 @@ class Car:
         # Car color. Will change if collision is detected.
         self.car_color = arcade.color.BLUE_SAPPHIRE
 
+        # Car sensors, AI information can be gotten from this.
+        # -1 means no collision is detected in the line of sight.
+        # 0-1 means the distance.
+        self.sensors = [ -1 for _ in range(len(Car.car_sensor)//2) ]
+
     def update(self):
         """ Update every frame """
         # TODO: Put AI Code here.
@@ -78,6 +83,9 @@ class Car:
         # Handle rotation and movements
         # Handle the turn
         self.rotate(self.direction - self.wheel_turn * delta_unit(Car.car_maxturnrate))
+        
+        # Reset sensor
+        self.sensors = [ -1 for _ in range(len(Car.car_sensor)//2) ]
 
     def handle_movement(self, future_poly=None):
         """ Script to handle movement with futures and collisions.
@@ -99,7 +107,6 @@ class Car:
             self.direction = self.fdirection
             self.res_poly = future_poly
             
-
     def get_future_poly(self, poly):
         """ Gets the future poly """
         # If direction is changed, then run the rotation matrix poly. If not, just translation.
@@ -232,6 +239,9 @@ class CarManager:
         """ Reconstructs and handles the collision on the fly, to be more efficient """
         self.coll_dict = {}
 
+        # Grid size
+        size = g.conf["col_grid_size"]
+
         for car in self.cars:
             # Update the car vars
             car.update()
@@ -246,8 +256,6 @@ class CarManager:
             collision = False
 
             ## Checks and inserts the bounding box into the grids that it overlaps
-            # Grid size
-            size = g.conf["col_grid_size"]
             # Gets all the grid it consumes
             for i in range(int(x1 // size), int(x2 // size + 1)):
                 for j in range(int(y1 // size), int(y2 // size + 1)):
@@ -285,6 +293,33 @@ class CarManager:
                 car.handle_movement(f_poly)
             else:
                 car.handle_movement()
+
+        # Here, we can do one more iteration to get all the distances from the sensors.
+        # We are doing it here because only here all the collision map for the moment is done.
+        for car in self.cars:
+
+            # First, iterate all the individual sensors
+            for s in range(len(car.res_sensor)//2):
+
+                # Gets the bounding box for the current sensor
+                # This is an array length of 4 [x1, y1, x2, y2]
+                sensor = car.res_sensor[s*2] + car.res_sensor[s*2 +1]
+                x1, y1, x2, y2 = col.correct_bounding_box(*sensor)
+
+                # Iterate all the collision objects
+                for i in range(int(x1 // size), int(x2 // size + 1)):
+                    for j in range(int(y1 // size), int(y2 // size + 1)):
+                        
+                        # First, iterate over the roads
+                        for obj in self.trackmanager.coll_dict.get((i, j), []):
+                            # If a bounding box is found
+                            if col.rectrect(x1, y1, x2, y2, *col.correct_bounding_box(*obj)):
+                                # print("Sensor {}:".format(s), *sensor, *obj)
+                                # Find the line intersection.
+                                intersection = col.lineline(*sensor, *obj, True)
+                                if intersection:
+                                    # Add the sensor data to the car object.
+                                    car.sensors[s] = distance(sensor[0], sensor[1], *intersection, True)
     
     def update(self):
         self.update_cars()

@@ -48,3 +48,7 @@ def clamp(val, min, max):
     elif val < min:
         return min
     return val
+
+def distance(x1, y1, x2, y2, root=True):
+    """ Pythagorean theorem. can be rooted can be not for performance """
+    return ((x2-x1)**2 + (y2-y1)**2)**0.5 if root else (x2-x1)**2 + (y2-y1)**2

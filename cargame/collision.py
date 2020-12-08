@@ -3,7 +3,7 @@
 from numpy.lib.polynomial import poly1d
 
 
-def lineline(x1, y1, x2, y2, x3, y3, x4, y4):
+def lineline(x1, y1, x2, y2, x3, y3, x4, y4, get_intersection=False):
     """ Used to detect line on line intersection (Medium-fast) """
     try:
         uA = ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1))
@@ -11,10 +11,10 @@ def lineline(x1, y1, x2, y2, x3, y3, x4, y4):
     except ZeroDivisionError:
         if y2-y1 == 0 and y4-y3 == 0:
             return False
-        return True
+        return [0, 0] if get_intersection else True
 
     if uA >= 0 and uA <= 1 and uB >= 0 and uB <= 1:
-        return True
+        return [x1 + (uA * (x2-x1)), y1 + (uA * (y2-y1))] if get_intersection else True
     return False
 
 def linerect(x1, y1, x2, y2, rx1, ry1, rx2, ry2):
