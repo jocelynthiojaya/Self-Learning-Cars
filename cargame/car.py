@@ -167,7 +167,8 @@ class Car:
         arcade.draw_polygon_filled(self.res_poly, self.car_color)
         arcade.draw_polygon_outline(self.res_poly,  Car.outline_col)
         self.draw_bounding_box()
-        arcade.draw_lines(self.res_sensor, (50, 50, 50, 50))
+        # This is to draw the sensor lines
+        # arcade.draw_lines(self.res_sensor, (50, 50, 50, 50))
 
     def get_bounding_box(self, poly=None):
         """ Gets the bounding box of the polygons. (Updates it if necessary)
@@ -320,9 +321,12 @@ class CarManager:
                 # Gets the bounding box for the current sensor
                 # This is an array length of 4 [x1, y1, x2, y2]
                 sensor = car.res_sensor[s*2] + car.res_sensor[s*2 +1]
+                
+                # Get the correct bounding box
                 x1, y1, x2, y2 = col.correct_bounding_box(*sensor)
 
                 # Iterate all the collision objects
+                collision = False
                 for i in range(int(x1 // size), int(x2 // size + 1)):
                     for j in range(int(y1 // size), int(y2 // size + 1)):
                         
@@ -336,12 +340,17 @@ class CarManager:
                                 if intersection:
                                     # Add the sensor data to the car object.
                                     car.sensors[s] = distance(sensor[0], sensor[1], *intersection, True)
+                                    collision = True
                                     if self.draw_sensor: self.collision_points.append(intersection)
 
                         # If enabled, detect car collision here
                         if self.car_coll:
                             # Implement car collision here (Optional)
                             pass
+
+                # Draw the dot at the tip of the sensor if collision is not detected.
+                if self.draw_sensor and not collision:
+                    self.collision_points.append([sensor[2], sensor[3]])
     
     def update(self):
         self.update_cars()
@@ -351,4 +360,4 @@ class CarManager:
             car.on_draw()
 
         if self.draw_sensor:
-            arcade.draw_points(self.collision_points, arcade.color.RED, 5)
+            arcade.draw_points(self.collision_points, arcade.color.GRAY, 3)
