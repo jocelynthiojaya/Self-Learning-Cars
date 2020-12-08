@@ -103,10 +103,9 @@ class TrackManager:
         
         size = g.conf["col_grid_size"]
         for grid in self.coll_dict:
-            for _ in range(len(self.coll_dict[grid])):
-                arcade.draw_rectangle_filled(grid[0]*size + size/2, grid[1]*size + size/2, size, size, (255, 0, 0, 20))
+            arcade.draw_rectangle_filled(grid[0]*size + size/2, grid[1]*size + size/2, size, size, (255, 0, 0, 20 * len(self.coll_dict[grid])))
 
     def on_draw(self):
         """ Draw """
-        arcade.draw_lines(self.track_poly, (20, 20, 20), TrackManager.track_width)
         self.draw_debug_squares()
+        arcade.draw_lines(self.track_poly, (20, 20, 20), TrackManager.track_width)

@@ -3,10 +3,12 @@ import numpy as np
 from cargame.util import rotation_matrix, delta_unit, clamp
 import cargame.collision as col
 import cargame.globals as g
+from time import time
 
 class Car:
     """ Car object, with collisions """
 
+    # The shape of the car
     car_poly = [
             [30, 0],
             [25, 10],
@@ -14,6 +16,15 @@ class Car:
             [-5, -10],
             [25, -10]
         ]
+
+    # The sensor of the cars. Is an array of point pairs
+    car_sensor = [
+        [30, 0], [100, 0],
+        [25, 10], [65, 50],
+        [25, -10], [65, -50],
+        [20, 10], [20, 50],
+        [20, -10], [20, -50]
+    ]
 
     car_maxturnrate = 120
 
@@ -34,7 +45,10 @@ class Car:
         self.direction = 0
 
         # Result poly, this will be drawn.
-        self.res_poly = np.add([x, y], Car.car_poly)
+        self.res_poly = [ [self.x + x, self.y + y] for x, y in Car.car_poly ]
+
+        # Sensor poly, this is used to gather collision information
+        self.res_sensor = [ [self.x + x, self.y + y] for x, y in Car.car_sensor ]
 
         # The bounding box variables
         # Note: The bounding box is relative to 0. Not yet appended with the
@@ -53,6 +67,9 @@ class Car:
         # Turn rate
         # -1.0 = left, 0 = straight, 1.0 = right
         self.wheel_turn = 0
+
+        # Car color. Will change if collision is detected.
+        self.car_color = arcade.color.BLUE_SAPPHIRE
 
     def update(self):
         """ Update every frame """
@@ -75,29 +92,31 @@ class Car:
             self.fy = self.y
             self.fdirection = self.direction
         else:
-            # If no collision, then replace the current poly with the new poly
+            # If no collision, then replace the current poly with the new poly, and calculate poly for sensors
+            self.res_sensor = self.get_future_poly(Car.car_sensor)
             self.x = self.fx
             self.y = self.fy
             self.direction = self.fdirection
             self.res_poly = future_poly
             
 
-    def get_future_poly(self):
+    def get_future_poly(self, poly):
         """ Gets the future poly """
         # If direction is changed, then run the rotation matrix poly. If not, just translation.
         if self.fdirection != self.direction:
             # Translation and rotation matrix
             new_poly = []
-            for x, y in Car.car_poly:
+            for x, y in poly:
                 rot = rotation_matrix(x, y, np.radians(self.fdirection))
                 new_poly.append([rot[0] + self.fx, rot[1] + self.fy])
             return new_poly
         else:
             # Do normal translation
-            return [ [self.fx + x, self.fy + y] for x, y in Car.car_poly ]
+            return [ [self.fx + x, self.fy + y] for x, y in poly ]
 
     def on_collision(self):
         """ Will be run if collision is detected. """
+        self.car_color = arcade.color.RED_DEVIL
 
     def rotate(self, direction):
         """ In degrees, set the car's direction to the value, rotate the car polygons, and 
@@ -136,8 +155,9 @@ class Car:
 
     def on_draw(self):
         """ Draw """
-        arcade.draw_polygon_filled(self.res_poly, arcade.color.BLUE_SAPPHIRE)
+        arcade.draw_polygon_filled(self.res_poly, self.car_color)
         self.draw_bounding_box()
+        arcade.draw_lines(self.res_sensor, (50, 50, 50, 80))
 
     def get_bounding_box(self, poly=None):
         """ Gets the bounding box of the polygons. (Updates it if necessary)
@@ -217,7 +237,7 @@ class CarManager:
             car.update()
             
             # Get the future polygon, and use it for collision
-            f_poly = car.get_future_poly()
+            f_poly = car.get_future_poly(Car.car_poly)
 
             # First, based on the car's bounding box insert it into the coll_dict.
             x1, y1, x2, y2 = col.poly_bounding_box(f_poly)
