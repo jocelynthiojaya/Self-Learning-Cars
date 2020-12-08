@@ -28,6 +28,8 @@ class Car:
 
     car_maxturnrate = 120
 
+    outline_col = arcade.color.CELESTIAL_BLUE
+
     def __init__(self, x, y):
         """ Inits the car """
         # The coordinates of the origin point
@@ -163,8 +165,9 @@ class Car:
     def on_draw(self):
         """ Draw """
         arcade.draw_polygon_filled(self.res_poly, self.car_color)
+        arcade.draw_polygon_outline(self.res_poly,  Car.outline_col)
         self.draw_bounding_box()
-        arcade.draw_lines(self.res_sensor, (50, 50, 50, 80))
+        arcade.draw_lines(self.res_sensor, (50, 50, 50, 30))
 
     def get_bounding_box(self, poly=None):
         """ Gets the bounding box of the polygons. (Updates it if necessary)
@@ -228,6 +231,10 @@ class CarManager:
         # Cars that this car manager contains
         self.cars = []
 
+        # Is car collision will be detected too?
+        # If so change this variable.
+        self.car_coll = False
+
         # The collision dictionary
         self.coll_dict = {}
 
@@ -237,7 +244,7 @@ class CarManager:
     def update_cars(self):
         """ Does all the collision algorithms for the car, and the update mechanism with the track also. """
         """ Reconstructs and handles the collision on the fly, to be more efficient """
-        self.coll_dict = {}
+        if self.car_coll: self.coll_dict = {}
 
         # Grid size
         size = g.conf["col_grid_size"]
@@ -273,7 +280,7 @@ class CarManager:
                                     collision = True
                                 break
                     # Car collision
-                    if not collision:
+                    if (not collision) and self.car_coll:
                         for obj in self.coll_dict.get((i, j), []):
                             # Check the AABB of the current car and the destination object
                             if col.rectrect(x1, y1, x2, y2, obj[0], obj[1], obj[2], obj[3]):
@@ -282,11 +289,12 @@ class CarManager:
                                     collision = True
                                 break
                     
-                    # Insert into grid.
-                    if (i, j) not in self.coll_dict:
-                        self.coll_dict[(i, j)] = [[x1, y1, x2, y2]]
-                    else:
-                        self.coll_dict[(i, j)].append([x1, y1, x2, y2])
+                    if self.car_coll:
+                        # Insert into grid.
+                        if (i, j) not in self.coll_dict:
+                            self.coll_dict[(i, j)] = [[x1, y1, x2, y2]]
+                        else:
+                            self.coll_dict[(i, j)].append([x1, y1, x2, y2])
 
             # Move the car if collision is not detected.
             if not collision:
@@ -320,6 +328,11 @@ class CarManager:
                                 if intersection:
                                     # Add the sensor data to the car object.
                                     car.sensors[s] = distance(sensor[0], sensor[1], *intersection, True)
+
+                        # If enabled, detect car collision here
+                        if self.car_coll:
+                            # Implement car collision here (Optional)
+                            pass
     
     def update(self):
         self.update_cars()
