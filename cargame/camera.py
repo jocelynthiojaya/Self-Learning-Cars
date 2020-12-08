@@ -149,11 +149,12 @@ class Camera:
 
 class Grid():
 
+    grid_size = 128
+
     def __init__(self, camera):
         """
         Detects the camera movement
         """
-        self.grid_size = 40
         self.grid_lines = []
         self.camera: Camera = camera
         self.recreate_grid()
@@ -172,14 +173,14 @@ class Grid():
 
         # Recreate the vertical lines
         viewport = self.camera.get_viewport()
-        for i in range(int(viewport[0]) // self.grid_size + 2):
-            self.grid_lines.append([self.camera.x + self.grid_size * i - (self.camera.x % self.grid_size), self.camera.y + -self.grid_size])
-            self.grid_lines.append([self.camera.x + self.grid_size * i - (self.camera.x % self.grid_size), self.camera.y + viewport[1] + self.grid_size])
+        for i in range(int(viewport[0]) // Grid.grid_size + 2):
+            self.grid_lines.append([self.camera.x + Grid.grid_size * i - (self.camera.x % Grid.grid_size), self.camera.y + -Grid.grid_size])
+            self.grid_lines.append([self.camera.x + Grid.grid_size * i - (self.camera.x % Grid.grid_size), self.camera.y + viewport[1] + Grid.grid_size])
 
         # Horizontal lines
-        for i in range(int(viewport[1]) // self.grid_size + 2):
-            self.grid_lines.append([self.camera.x + -self.grid_size, self.camera.y + self.grid_size * i - (self.camera.y % self.grid_size)])
-            self.grid_lines.append([self.camera.x + viewport[0] + self.grid_size, self.camera.y + self.grid_size * i - (self.camera.y % self.grid_size)])
+        for i in range(int(viewport[1]) // Grid.grid_size + 2):
+            self.grid_lines.append([self.camera.x + -Grid.grid_size, self.camera.y + Grid.grid_size * i - (self.camera.y % Grid.grid_size)])
+            self.grid_lines.append([self.camera.x + viewport[0] + Grid.grid_size, self.camera.y + Grid.grid_size * i - (self.camera.y % Grid.grid_size)])
 
     def draw_grid(self):
         """ Draws the grid based on the configuration """

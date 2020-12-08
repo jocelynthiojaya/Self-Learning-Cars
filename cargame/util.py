@@ -1,5 +1,6 @@
 import arcade
 import numpy as np
+import cargame.globals as g
 
 def invlerp(a, b, v):
     """ Inverse lerp.
@@ -32,13 +33,13 @@ def rotation_matrix(x, y, theta):
     """
     return [np.cos(theta) * x - np.sin(theta) * y, np.sin(theta) * x + np.cos(theta) * y]
 
-def delta_unit(value, delta):
+def delta_unit(value):
     """ This will return a value processed according to the delta time frame.
 
     value: value per second.
     delta: frame time difference
     """
-    return value * delta
+    return value * g.delta
 
 def clamp(val, min, max):
     """ Clamps the number """
@@ -47,3 +48,7 @@ def clamp(val, min, max):
     elif val < min:
         return min
     return val
+
+def distance(x1, y1, x2, y2, root=True):
+    """ Pythagorean theorem. can be rooted can be not for performance """
+    return ((x2-x1)**2 + (y2-y1)**2)**0.5 if root else (x2-x1)**2 + (y2-y1)**2

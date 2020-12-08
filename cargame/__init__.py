@@ -2,8 +2,8 @@ import arcade
 from cargame.camera import Camera, Grid
 from cargame.ui import GameUI
 from cargame.car import Car, CarManager
-from cargame.track import Track, TrackManager
-from cargame.globals import conf
+from cargame.track import TrackManager
+import cargame.globals as g
 import cargame.util as util
 
 WINDOW_TITLE = "Self Learning Cars"
@@ -14,51 +14,68 @@ class Main(arcade.Window):
     def __init__(self):
         """ Initialize the window """
         # Create the object
-        super().__init__(conf["screen_width"], conf["screen_height"], WINDOW_TITLE)
+        super().__init__(g.conf["screen_width"], g.conf["screen_height"], WINDOW_TITLE)
 
         # Set background color as white
         arcade.set_background_color(arcade.color.WHITE)
         # Camera object
         self.cam = Camera(
-            conf["c_bound_left"],
-            conf["c_bound_bottom"],
-            conf["c_bound_right"],
-            conf["c_bound_top"]
+            g.conf["c_bound_left"],
+            g.conf["c_bound_bottom"],
+            g.conf["c_bound_right"],
+            g.conf["c_bound_top"]
         )
         self.grid = Grid(self.cam)
         self.ui = GameUI(self.cam)
 
-        self.fps = 0
         self.fps_text = ""
 
-        self.car_manager = CarManager()
-        self.car = Car(200, 200)
-        self.track = Track([
+        self.track_manager = TrackManager()
+        self.track_manager.add_track([
             [150, 150],
             [500, 150],
             [700, 300],
             [1100, 300],
-            [1100, 400],
+            [1400, 0],
+            [1900, 0],
+            [1900, 150],
+            [1400, 150],
+            [1150, 400],
             [650, 400],
             [450, 250],
             [150, 250],
             [150, 150]
         ])
+        # self.track_manager.add_track([
+        #     [0, 0],
+        #     [256, 256]
+        # ])
+
+        self.car_manager = CarManager(self.track_manager)
+        self.car_manager.insert_car(Car(200, 200))
+        self.car_manager.insert_car(Car(220, 210))
 
         # Schedule fps update
         arcade.schedule(self.update_fps_counter, 0.5)
 
     def update(self, delta_time: float):
         """ Will be run every frame """
+        # Update the camera at the start
         self.cam.on_start_update()
-        self.fps = 1/delta_time
+        
+        # Updates the delta time on globals
+        g.delta = delta_time
 
-        self.car.move_forward(util.delta_unit(100, delta_time))
-        self.car.rotate(self.car.direction + util.delta_unit(30, delta_time))
+        self.car_manager.cars[0].move_forward(util.delta_unit(100))
+        self.car_manager.cars[0].set_wheel(-0.043)
+        self.car_manager.cars[1].move_forward(util.delta_unit(80))
+        self.car_manager.cars[1].set_wheel(-0.033)
+
+        self.car_manager.update()
     
     def update_fps_counter(self, delta_time):
         """ Used by scheduling to update the fps """
-        self.fps_text = "FPS: " + str(round(self.fps))
+        self.fps_text = "FPS: " + str(round(1/g.delta))
 
     def on_draw(self):
         """ Will be called everytime the screen is drawn """
@@ -69,9 +86,10 @@ class Main(arcade.Window):
         # Draws the grid
         self.grid.draw_grid()
 
-        self.track.on_draw()
+        # Draw the track manager
+        self.track_manager.on_draw()
 
-        self.car.on_draw()
+        self.car_manager.on_draw()
 
         # Draws the fps counter
         self.ui.set_text(self.fps_text)
