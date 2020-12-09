@@ -5,6 +5,7 @@ from cargame.car import Car, CarManager
 from cargame.track import TrackManager
 import cargame.globals as g
 import cargame.util as util
+from random import randint, random
 
 WINDOW_TITLE = "Self Learning Cars"
 
@@ -52,9 +53,13 @@ class Main(arcade.Window):
         # ])
 
         self.car_manager = CarManager(self.track_manager)
-        self.car_manager.insert_car(Car(200, 200))
-        self.car_manager.insert_car(Car(220, 210))
-        self.car_manager.insert_car(Car(230, 220))
+
+        for _ in range(20):
+            car = Car(200, 200)
+            # car.set_speed(randint(30, 70))
+            # car.set_wheel((random()*0.3) - 0.15)
+            self.car_manager.insert_car(car)
+        
 
         # Schedule fps update
         arcade.schedule(self.update_fps_counter, 0.5)

@@ -83,6 +83,7 @@ class Car:
         
         # Car's speed
         self.speed = 0
+        self.accel = 0
 
     def update(self):
         """ Update every frame """
@@ -92,6 +93,7 @@ class Car:
 
         ########################################
         # Handle acceleration and speed
+        self.speed += delta_unit(self.accel)
         if self.speed != 0: self.move_forward(self.speed)
 
         # Handle rotation and movements
@@ -137,7 +139,7 @@ class Car:
     def set_accel(self, accel):
         """ Set the car's acceleration """
         """ Accel is pixel per second second """
-        self.speed += delta_unit(accel)
+        self.accel = accel
 
     def on_collision(self):
         """ Will be run if collision is detected. """
@@ -164,6 +166,10 @@ class Car:
         1.0 = right
         """
         self.wheel_turn = clamp(wheel, -1, 1)
+
+    def set_speed(self, speed):
+        """ Sets the constant speed of the car """
+        self.speed = speed
 
     def move_forward(self, speed):
         """ Moves the car forward according to the direction. The speed unit is pixels.
