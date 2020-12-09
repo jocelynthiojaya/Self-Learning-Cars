@@ -30,6 +30,9 @@ class Car:
 
     outline_col = arcade.color.CELESTIAL_BLUE
 
+    # This is in pixel per second
+    max_speed = 100
+
     def __init__(self, x, y):
         """ Inits the car """
         # The coordinates of the origin point
@@ -77,13 +80,21 @@ class Car:
         # -1 means no collision is detected in the line of sight.
         # 0-1 means the distance.
         self.sensors = [ -1 for _ in range(len(Car.car_sensor)//2) ]
+        
+        # Car's speed
+        self.speed = 0
 
     def update(self):
         """ Update every frame """
         # TODO: Put AI Code here.
+        ########################################
+
+
+        ########################################
+        # Handle acceleration and speed
+        if self.speed != 0: self.move_forward(self.speed)
 
         # Handle rotation and movements
-        # Handle the turn
         self.rotate(self.direction - self.wheel_turn * delta_unit(Car.car_maxturnrate))
         
         # Reset sensor
@@ -123,6 +134,11 @@ class Car:
             # Do normal translation
             return [ [self.fx + x, self.fy + y] for x, y in poly ]
 
+    def set_accel(self, accel):
+        """ Set the car's acceleration """
+        """ Accel is pixel per second second """
+        self.speed += delta_unit(accel)
+
     def on_collision(self):
         """ Will be run if collision is detected. """
         self.car_color = arcade.color.RED_DEVIL
@@ -153,8 +169,10 @@ class Car:
         """ Moves the car forward according to the direction. The speed unit is pixels.
         if speed is minus, then car will move backwards. """
 
+        # Clamp the speed
+        speed = clamp(delta_unit(speed), 0, delta_unit(Car.max_speed))
+
         # Appends the speed according to the direction
-        
         rad = np.radians(self.direction)
         self.fx += speed * np.cos(rad)
         self.fy += speed * np.sin(rad)
