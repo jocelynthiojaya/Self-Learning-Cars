@@ -85,6 +85,8 @@ class Car:
         self.speed = 0
         self.accel = 0
 
+        # TODO: Add whether car is active or not.
+
     def update(self):
         """ Update every frame """
         # TODO: Put AI Code here.

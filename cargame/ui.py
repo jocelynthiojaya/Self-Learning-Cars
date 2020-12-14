@@ -25,14 +25,18 @@ class GameUI():
 
     def on_draw(self):
 
+        # Only draws when the camera has 1x magnification.
         camx, _, camy, _ = arcade.get_viewport()
-        # Base UI Rectangle
-        util.draw_rectangle_rounded(camx + conf["screen_width"]/2, camy + Y_UI_CENTER, UI_WIDTH, UI_HEIGHT, 15, (230, 230, 230))
-        
-        # Draw the text container and text
-        text_rect_x = camx + conf["screen_width"]/2 + UI_WIDTH/2 - TEXT_WIDTH/2 - 10
-        text_rect_y = camy + Y_UI_CENTER
-        arcade.draw_rectangle_outline(text_rect_x, text_rect_y, TEXT_WIDTH, TEXT_HEIGHT, (50, 50, 50))
-        arcade.draw_rectangle_filled(text_rect_x, text_rect_y, TEXT_WIDTH, TEXT_HEIGHT, (255, 255, 255))
+        if self.cam.zoom == 1:
+            # Base UI Rectangle
+            util.draw_rectangle_rounded(camx + conf["screen_width"]/2, camy + Y_UI_CENTER, UI_WIDTH, UI_HEIGHT, 15, (230, 230, 230))
+            
+            # Draw the text container and text
+            text_rect_x = camx + conf["screen_width"]/2 + UI_WIDTH/2 - TEXT_WIDTH/2 - 10
+            text_rect_y = camy + Y_UI_CENTER
+            arcade.draw_rectangle_outline(text_rect_x, text_rect_y, TEXT_WIDTH, TEXT_HEIGHT, (50, 50, 50))
+            arcade.draw_rectangle_filled(text_rect_x, text_rect_y, TEXT_WIDTH, TEXT_HEIGHT, (255, 255, 255))
 
-        arcade.draw_text(self.ui_text, text_rect_x - TEXT_WIDTH/2 + TEXT_MARGIN, text_rect_y - TEXT_HEIGHT/2 + TEXT_MARGIN, (10, 10, 10), 12, TEXT_WIDTH - TEXT_MARGIN*2, font_name="courbd")
+            arcade.draw_text(self.ui_text, text_rect_x - TEXT_WIDTH/2 + TEXT_MARGIN, text_rect_y - TEXT_HEIGHT/2 + TEXT_MARGIN, (10, 10, 10), 12, TEXT_WIDTH - TEXT_MARGIN*2, font_name="courbd")
+        else:
+            arcade.draw_text("Press ` to reset zoom.", camx + 10, camy + 10, (10, 10, 10), 12, font_name="courbd")

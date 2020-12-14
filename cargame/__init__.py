@@ -59,7 +59,6 @@ class Main(arcade.Window):
             # car.set_speed(randint(30, 70))
             # car.set_wheel((random()*0.3) - 0.15)
             self.car_manager.insert_car(car)
-        
 
         # Schedule fps update
         arcade.schedule(self.update_fps_counter, 0.5)
@@ -116,6 +115,10 @@ class Main(arcade.Window):
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         """ Controls the zoom """
         self.cam.handle_zoom(x, y, scroll_y)
+
+    def on_key_press(self, symbol: int, modifiers: int):
+        if symbol == arcade.key.GRAVE:
+            self.cam.update_zoom(1, g.conf["screen_width"]/2, g.conf["screen_height"]/2)
 
 
 def run_game():
