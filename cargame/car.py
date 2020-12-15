@@ -191,8 +191,8 @@ class Car:
     def on_draw(self):
         """ Draw """
         arcade.draw_polygon_filled(self.res_poly, self.car_color)
-        arcade.draw_polygon_outline(self.res_poly,  Car.outline_col)
-        self.draw_bounding_box()
+        # arcade.draw_polygon_outline(self.res_poly,  Car.outline_col)
+        # self.draw_bounding_box()
         # This is to draw the sensor lines
         # arcade.draw_lines(self.res_sensor, (50, 50, 50, 50))
 
@@ -401,6 +401,5 @@ class CarManager:
             car.on_draw()
 
         # print("draw_time: {}ms".format(round((time() - start) * 1000, 2)))
-
-        if self.draw_sensor:
+        if self.draw_sensor and len(self.collision_points) != 0:
             arcade.draw_points(self.collision_points, arcade.color.GRAY, 3)
