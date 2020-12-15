@@ -85,7 +85,7 @@ class Car:
         self.speed = 0
         self.accel = 0
 
-        # TODO: Add whether car is active or not.
+        self.active = True
 
     def update(self):
         """ Update every frame """
@@ -283,8 +283,14 @@ class CarManager:
 
         # Grid size
         size = g.conf["col_grid_size"]
+        # start = time()
 
         for car in self.cars:
+            # We check first if the car is active.
+            # If its not, move on to the next car.
+            if not car.active:
+                continue
+
             # Update the car vars
             car.update()
             
@@ -335,11 +341,17 @@ class CarManager:
             if not collision:
                 car.handle_movement(f_poly)
             else:
+                # Don't move the car and deactivate.
                 car.handle_movement()
+                car.active = False
 
         # Here, we can do one more iteration to get all the distances from the sensors.
         # We are doing it here because only here all the collision map for the moment is done.
         for car in self.cars:
+            # Only update active cars.
+            # If its not, move on to the next car.
+            if not car.active:
+                continue
 
             # First, iterate all the individual sensors
             for s in range(len(car.res_sensor)//2):
@@ -377,13 +389,18 @@ class CarManager:
                 # Draw the dot at the tip of the sensor if collision is not detected.
                 if self.draw_sensor and not collision:
                     self.collision_points.append([sensor[2], sensor[3]])
+
+        # print("col_time: {}ms".format(round((time() - start) * 1000, 2)))
     
     def update(self):
         self.update_cars()
 
     def on_draw(self):
+        # start = time()
         for car in self.cars:
             car.on_draw()
+
+        # print("draw_time: {}ms".format(round((time() - start) * 1000, 2)))
 
         if self.draw_sensor:
             arcade.draw_points(self.collision_points, arcade.color.GRAY, 3)
