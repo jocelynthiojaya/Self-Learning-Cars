@@ -52,19 +52,15 @@ class Main(arcade.Window):
         #     [256, 256]
         # ])
 
-        self.car_manager = CarManager(self.track_manager)
-
-        for _ in range(20):
-            car = Car(200, 200)
-            # car.set_speed(randint(30, 70))
-            # car.set_wheel((random()*0.3) - 0.15)
-            self.car_manager.insert_car(car)
+        # Create the new car manager
+        self.car_manager = CarManager(self.track_manager, 200, 200, 0, 20)
 
         # Schedule fps update
         arcade.schedule(self.update_fps_counter, 0.5)
 
     def update(self, delta_time: float):
         """ Will be run every frame """
+        self.ui.set_text("")
         # Update the camera at the start
         self.cam.on_start_update()
         
@@ -99,7 +95,7 @@ class Main(arcade.Window):
         self.car_manager.on_draw()
 
         # Draws the fps counter
-        self.ui.set_text(self.fps_text)
+        self.ui.append_text(self.fps_text)
         self.ui.on_draw()
 
         self.cam.update_viewport()

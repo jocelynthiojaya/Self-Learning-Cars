@@ -23,6 +23,10 @@ class GameUI():
         """ Sets the new UI Text """
         self.ui_text = text
 
+    def append_text(self, text):
+        """ Appends to the new UI Text """
+        self.ui_text += text
+
     def on_draw(self):
 
         # Only draws when the camera has 1x magnification.

@@ -4,6 +4,7 @@ from cargame.util import rotation_matrix, delta_unit, clamp, distance
 import cargame.collision as col
 import cargame.globals as g
 from time import time
+from random import randint, random
 
 class Car:
     """ Car object, with collisions """
@@ -99,7 +100,7 @@ class Car:
         if self.speed != 0: self.move_forward(self.speed)
 
         # Handle rotation and movements
-        self.rotate(self.direction - self.wheel_turn * delta_unit(Car.car_maxturnrate))
+        self.rotate(self.direction - self.wheel_turn * delta_unit(Car.car_maxturnrate) + self.fdirection - self.direction)
         
         # Reset sensor
         self.sensors = [ -1 for _ in range(len(Car.car_sensor)//2) ]
@@ -250,7 +251,7 @@ class Car:
 class CarManager:
     """ Contains many car """
 
-    def __init__(self, trackmanager):
+    def __init__(self, trackmanager, x_begin, y_begin, direction, count):
         """ Inits the Carmanager, needs a trackmanager as a parameter to calculate the collisions"""
 
         self.trackmanager = trackmanager
@@ -270,6 +271,24 @@ class CarManager:
 
         # Store sensor collision points here for drawing.
         self.collision_points = []
+
+        # Coordinates from which the cars would begin
+        self.x_begin = x_begin
+        self.y_begin = y_begin
+
+        # Amount of cars to be created.
+        self.count = count
+        
+        # Set the initial directions
+        self.direction = direction
+
+        # Create the cars
+        for _ in range(count):
+            car = Car(x_begin, y_begin)
+            car.rotate(direction)
+            # car.set_speed(randint(30, 70))
+            # car.set_wheel((random()*0.3) - 0.15)
+            self.insert_car(car)
 
     def insert_car(self, car):
         self.cars.append(car)
