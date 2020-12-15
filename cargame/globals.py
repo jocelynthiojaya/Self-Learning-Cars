@@ -12,3 +12,6 @@ conf = {
 
 # Delta timing on the frames
 delta = 0
+
+# Display text to the UI
+ui_text = ""

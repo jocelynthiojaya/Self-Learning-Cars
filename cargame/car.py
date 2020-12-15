@@ -286,8 +286,8 @@ class CarManager:
         for _ in range(count):
             car = Car(x_begin, y_begin)
             car.rotate(direction)
-            # car.set_speed(randint(30, 70))
-            # car.set_wheel((random()*0.3) - 0.15)
+            car.set_speed(randint(30, 70))
+            car.set_wheel((random()*0.3) - 0.15)
             self.insert_car(car)
 
     def insert_car(self, car):
@@ -304,11 +304,14 @@ class CarManager:
         size = g.conf["col_grid_size"]
         # start = time()
 
+        # Counter for the cars
+        counter = 0
         for car in self.cars:
             # We check first if the car is active.
             # If its not, move on to the next car.
             if not car.active:
                 continue
+            counter += 1
 
             # Update the car vars
             car.update()
@@ -409,6 +412,7 @@ class CarManager:
                 if self.draw_sensor and not collision:
                     self.collision_points.append([sensor[2], sensor[3]])
 
+        g.ui_text += "Active cars:{}\n".format(counter)
         # print("col_time: {}ms".format(round((time() - start) * 1000, 2)))
     
     def update(self):

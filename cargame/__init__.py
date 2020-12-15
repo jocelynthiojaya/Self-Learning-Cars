@@ -60,7 +60,7 @@ class Main(arcade.Window):
 
     def update(self, delta_time: float):
         """ Will be run every frame """
-        self.ui.set_text("")
+        g.ui_text = ""
         # Update the camera at the start
         self.cam.on_start_update()
         
@@ -75,10 +75,12 @@ class Main(arcade.Window):
         # self.car_manager.cars[1].set_wheel(-0.033)
 
         self.car_manager.update()
+        g.ui_text += self.fps_text
+        self.ui.set_text(g.ui_text.strip())
     
     def update_fps_counter(self, delta_time):
         """ Used by scheduling to update the fps """
-        self.fps_text = "FPS: " + str(round(1/g.delta))
+        self.fps_text = "FPS: {}\n".format(round(1/g.delta))
 
     def on_draw(self):
         """ Will be called everytime the screen is drawn """
@@ -95,7 +97,6 @@ class Main(arcade.Window):
         self.car_manager.on_draw()
 
         # Draws the fps counter
-        self.ui.append_text(self.fps_text)
         self.ui.on_draw()
 
         self.cam.update_viewport()
