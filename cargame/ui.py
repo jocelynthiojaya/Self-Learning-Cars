@@ -63,9 +63,10 @@ class Button():
             arcade.draw_rectangle_filled(camx + self.x + Button.width/2, camy + self.y + Button.height/2, Button.width, Button.height, self.pressed_color)
             self.down_left -= g.delta
         arcade.draw_text(self.text, camx + self.x, camy + self.y + 3, (255, 255, 255), 10, Button.width, "center")
-        self.sprite.center_x = camx + self.scenter_x
-        self.sprite.center_y = camy + self.scenter_y
-        self.sprite.draw()
+        if self.sprite:
+            self.sprite.center_x = camx + self.scenter_x
+            self.sprite.center_y = camy + self.scenter_y
+            self.sprite.draw()
 
 class GameUI():
 
@@ -77,7 +78,10 @@ class GameUI():
         # The buttons inside the ui
         self.buttons = [
             Button("Play", g.conf["screen_width"]/2 - UI_WIDTH/2 + 50, Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.sim_pause(False), "./cargame/sprites/play.png"),
-            Button("Pause", g.conf["screen_width"]/2 - UI_WIDTH/2 + 120, Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.sim_pause(True), "./cargame/sprites/pause.png")
+            Button("Pause", g.conf["screen_width"]/2 - UI_WIDTH/2 + 120, Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.sim_pause(True), "./cargame/sprites/pause.png"),
+            Button("Skip", g.conf["screen_width"]/2 - UI_WIDTH/2 + 190, Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh")),
+            Button("Exit Sim", g.conf["screen_width"]/2 - UI_WIDTH/2 + 260, Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh")),
+            Button("Save Car", g.conf["screen_width"]/2 - UI_WIDTH/2 + 330, Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh"))
         ]
 
     def sim_pause(self, state):
