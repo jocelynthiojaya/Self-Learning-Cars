@@ -4,6 +4,8 @@ from cargame.util import rotation_matrix, delta_unit, clamp, distance
 import cargame.collision as col
 import cargame.globals as g
 from time import time
+from carbrain.neuralnetwork import NeuralNetwork
+from random import random
 
 class Car:
     """ Car object, with collisions """
@@ -85,11 +87,17 @@ class Car:
         self.speed = 0
         self.accel = 0
 
+        # Car's weights
+        self.weights = np.array([random() for _ in range(38)])
+
     def update(self):
         """ Update every frame """
         # TODO: Put AI Code here.
         ########################################
-
+        neural1 = NeuralNetwork(self.sensors, self.weights)
+        ff = neural1.feedforward()
+        self.speed = ff[0]*100
+        self.wheel_turn = (ff[1]*2)-1
 
         ########################################
         # Handle acceleration and speed
@@ -97,7 +105,7 @@ class Car:
         if self.speed != 0: self.move_forward(self.speed)
 
         # Handle rotation and movements
-        self.rotate(self.direction - self.wheel_turn * delta_unit(Car.car_maxturnrate))
+        self.rotate(self.direction - clamp(self.wheel_turn, -1, 1) * delta_unit(Car.car_maxturnrate))
         
         # Reset sensor
         self.sensors = [ -1 for _ in range(len(Car.car_sensor)//2) ]
