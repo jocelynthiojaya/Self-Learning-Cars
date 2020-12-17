@@ -89,13 +89,15 @@ class Car:
 
         # Car's weights
         self.weights = np.array([random() for _ in range(38)])
+        
+        # Car's neural network
+        self.neuralnetwork = NeuralNetwork(self.weights)
 
     def update(self):
         """ Update every frame """
         # TODO: Put AI Code here.
         ########################################
-        neural1 = NeuralNetwork(self.sensors, self.weights)
-        ff = neural1.feedforward()
+        ff = self.neuralnetwork.feedforward(self.sensors)
         self.speed = ff[0]*100
         self.wheel_turn = (ff[1]*2)-1
 
