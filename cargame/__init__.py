@@ -117,6 +117,9 @@ class Main(arcade.Window):
         if symbol == arcade.key.GRAVE:
             self.cam.update_zoom(1, g.conf["screen_width"]/2, g.conf["screen_height"]/2)
 
+    def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
+        self.ui.on_click(x, y, button)
+
 
 def run_game():
     game = Main()
