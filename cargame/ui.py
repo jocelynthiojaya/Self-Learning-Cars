@@ -51,6 +51,7 @@ class Button():
     def set_coords(self, x, y):
         self.x = x
         self.y = y
+        # Relative distances to the center of the sprite
         self.scenter_x = x + Button.width/2
         self.scenter_y = y + Button.height - 16 - 9
 
@@ -75,9 +76,13 @@ class GameUI():
 
         # The buttons inside the ui
         self.buttons = [
-            Button("Play", g.conf["screen_width"]/2 - UI_WIDTH/2 + 50, Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh"), "./cargame/sprites/play.png"),
-            Button("Pause", g.conf["screen_width"]/2 - UI_WIDTH/2 + 120, Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh2"), "./cargame/sprites/pause.png")
+            Button("Play", g.conf["screen_width"]/2 - UI_WIDTH/2 + 50, Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.sim_pause(False), "./cargame/sprites/play.png"),
+            Button("Pause", g.conf["screen_width"]/2 - UI_WIDTH/2 + 120, Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.sim_pause(True), "./cargame/sprites/pause.png")
         ]
+
+    def sim_pause(self, state):
+        """ Pause the simulation """
+        g.paused = state
 
     def set_text(self, text):
         """ Sets the new UI Text """

@@ -290,6 +290,9 @@ class CarManager:
         """ Does all the collision algorithms for the car, and the update mechanism with the track also. """
         """ Reconstructs and handles the collision on the fly, to be more efficient """
 
+        # Run the cars if the sim is not paused.
+        if g.paused: return
+
         if self.draw_sensor: self.collision_points = []
 
         # Grid size
