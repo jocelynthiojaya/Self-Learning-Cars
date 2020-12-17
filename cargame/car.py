@@ -7,6 +7,15 @@ from time import time
 from carbrain.neuralnetwork import NeuralNetwork
 from random import random
 
+# The sensor of the cars. Is an array of point pairs
+CAR_SENSOR = [
+        [30, 0], [100, 0],
+        [25, 10], [65, 50],
+        [25, -10], [65, -50],
+        [20, 10], [20, 50],
+        [20, -10], [20, -50]
+    ]
+
 class Car:
     """ Car object, with collisions """
 
@@ -19,14 +28,11 @@ class Car:
             [25, -10]
         ]
 
-    # The sensor of the cars. Is an array of point pairs
-    car_sensor = [
-        [30, 0], [100, 0],
-        [25, 10], [65, 50],
-        [25, -10], [65, -50],
-        [20, 10], [20, 50],
-        [20, -10], [20, -50]
-    ]
+    # Just inherit from constant
+    car_sensor = CAR_SENSOR
+
+    # Calculate the individual maximum distances of the sensors.
+    sensor_max_dist = [ distance(*CAR_SENSOR[i*2], *CAR_SENSOR[i*2 + 1]) for i in range(len(CAR_SENSOR)//2) ]
 
     car_maxturnrate = 120
 
@@ -79,9 +85,9 @@ class Car:
         self.car_color = arcade.color.BLUE_SAPPHIRE
 
         # Car sensors, AI information can be gotten from this.
-        # -1 means no collision is detected in the line of sight.
+        # 1 means no collision is detected in the line of sight.
         # 0-1 means the distance.
-        self.sensors = [ -1 for _ in range(len(Car.car_sensor)//2) ]
+        self.sensors = [ 1 for _ in range(len(Car.car_sensor)//2) ]
         
         # Car's speed
         self.speed = 0
@@ -97,6 +103,7 @@ class Car:
         """ Update every frame """
         # TODO: Put AI Code here.
         ########################################
+
         ff = self.neuralnetwork.feedforward(self.sensors)
         self.speed = ff[0]*100
         self.wheel_turn = (ff[1]*2)-1
@@ -110,7 +117,7 @@ class Car:
         self.rotate(self.direction - clamp(self.wheel_turn, -1, 1) * delta_unit(Car.car_maxturnrate))
         
         # Reset sensor
-        self.sensors = [ -1 for _ in range(len(Car.car_sensor)//2) ]
+        self.sensors = [ 1 for _ in range(len(Car.car_sensor)//2) ]
 
     def handle_movement(self, future_poly=None):
         """ Script to handle movement with futures and collisions.
@@ -373,7 +380,7 @@ class CarManager:
                                 intersection = col.lineline(*sensor, *obj, True)
                                 if intersection:
                                     # Add the sensor data to the car object.
-                                    car.sensors[s] = distance(sensor[0], sensor[1], *intersection, True)
+                                    car.sensors[s] = distance(sensor[0], sensor[1], *intersection, True) / Car.sensor_max_dist[s]
                                     collision = True
                                     if self.draw_sensor: self.collision_points.append(intersection)
 
