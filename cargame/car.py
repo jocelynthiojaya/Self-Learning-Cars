@@ -3,9 +3,10 @@ import numpy as np
 from cargame.util import rotation_matrix, delta_unit, clamp, distance
 import cargame.collision as col
 import cargame.globals as g
+
 from time import time
 from carbrain.neuralnetwork import NeuralNetwork
-from random import random
+from random import randint, random
 
 # The sensor of the cars. Is an array of point pairs
 CAR_SENSOR = [
@@ -99,6 +100,9 @@ class Car:
         # Car's neural network
         self.neuralnetwork = NeuralNetwork(self.weights)
 
+        # Car's state
+        self.active = True
+
     def update(self):
         """ Update every frame """
         # TODO: Put AI Code here.
@@ -114,7 +118,8 @@ class Car:
         if self.speed != 0: self.move_forward(self.speed)
 
         # Handle rotation and movements
-        self.rotate(self.direction - clamp(self.wheel_turn, -1, 1) * delta_unit(Car.car_maxturnrate))
+        self.rotate(self.direction - clamp(self.wheel_turn, -1, 1) * delta_unit(Car.car_maxturnrate) + self.fdirection - self.direction)
+        # self.rotate(self.direction - self.wheel_turn * delta_unit(Car.car_maxturnrate) + self.fdirection - self.direction)
         
         # Reset sensor
         self.sensors = [ 1 for _ in range(len(Car.car_sensor)//2) ]
@@ -206,8 +211,8 @@ class Car:
     def on_draw(self):
         """ Draw """
         arcade.draw_polygon_filled(self.res_poly, self.car_color)
-        arcade.draw_polygon_outline(self.res_poly,  Car.outline_col)
-        self.draw_bounding_box()
+        # arcade.draw_polygon_outline(self.res_poly,  Car.outline_col)
+        # self.draw_bounding_box()
         # This is to draw the sensor lines
         # arcade.draw_lines(self.res_sensor, (50, 50, 50, 50))
 
@@ -265,20 +270,13 @@ class Car:
 class CarManager:
     """ Contains many car """
 
-    def __init__(self, trackmanager):
+    def __init__(self, trackmanager, x_begin, y_begin, direction, count):
         """ Inits the Carmanager, needs a trackmanager as a parameter to calculate the collisions"""
 
         self.trackmanager = trackmanager
 
         # Cars that this car manager contains
         self.cars = []
-
-        # Is car collision will be detected too?
-        # If so change this variable.
-        self.car_coll = False
-
-        # The collision dictionary
-        self.coll_dict = {}
         
         # If sensor point is enabled
         self.draw_sensor = True
@@ -286,20 +284,51 @@ class CarManager:
         # Store sensor collision points here for drawing.
         self.collision_points = []
 
+        # Coordinates from which the cars would begin
+        self.x_begin = x_begin
+        self.y_begin = y_begin
+
+        # Amount of cars to be created.
+        self.count = count
+        
+        # Set the initial directions
+        self.direction = direction
+
+        # Create the cars
+        for _ in range(count):
+            car = Car(x_begin, y_begin)
+            car.rotate(direction)
+            car.set_speed(randint(30, 70))
+            car.set_wheel((random()*0.3) - 0.15)
+            self.insert_car(car)
+
     def insert_car(self, car):
         self.cars.append(car)
 
     def update_cars(self):
         """ Does all the collision algorithms for the car, and the update mechanism with the track also. """
         """ Reconstructs and handles the collision on the fly, to be more efficient """
-        if self.car_coll: self.coll_dict = {}
+
+        # Run the cars if the sim is not paused.
+        if g.paused: return
 
         if self.draw_sensor: self.collision_points = []
 
         # Grid size
         size = g.conf["col_grid_size"]
+        # start = time()
 
+        # Counter for the cars
+        coll_checks = 0
+        hcoll_checks = 0
+        counter = 0
         for car in self.cars:
+            # We check first if the car is active.
+            # If its not, move on to the next car.
+            if not car.active:
+                continue
+            counter += 1
+
             # Update the car vars
             car.update()
             
@@ -326,37 +355,21 @@ class CarManager:
                             # Check the AABB of the current car and the destination object
                             if col.rectrect(x1, y1, x2, y2, *col.correct_bounding_box(obj[0], obj[1], obj[2], obj[3])):
                                 # AABB collision detected
+                                coll_checks += 1
                                 if col.linepoly(obj[0], obj[1], obj[2], obj[3], f_poly):
                                     collision = True
+                                    hcoll_checks += 1
                                 break
-                    # Car collision
-                    if self.car_coll and not collision:
-                        for obj in self.coll_dict.get((i, j), []):
-                            # Check the AABB of the current car and the destination object
-                            if col.rectrect(x1, y1, x2, y2, obj[0], obj[1], obj[2], obj[3]):
-                                # AABB collision detected
-                                if col.polypoly(f_poly, obj.res_poly):
-                                    collision = True
-                                break
-                    
-                    if self.car_coll:
-                        # Insert into grid.
-                        if (i, j) not in self.coll_dict:
-                            self.coll_dict[(i, j)] = [[x1, y1, x2, y2]]
-                        else:
-                            self.coll_dict[(i, j)].append([x1, y1, x2, y2])
 
             # Move the car if collision is not detected.
             if not collision:
                 car.handle_movement(f_poly)
             else:
+                # Don't move the car and deactivate.
                 car.handle_movement()
-
-        # Here, we can do one more iteration to get all the distances from the sensors.
-        # We are doing it here because only here all the collision map for the moment is done.
-        for car in self.cars:
-
-            # First, iterate all the individual sensors
+                car.active = False
+                        
+            # Here, we can do one more iteration to get all the distances from the sensors.
             for s in range(len(car.res_sensor)//2):
 
                 # Gets the bounding box for the current sensor
@@ -377,28 +390,30 @@ class CarManager:
                             if col.rectrect(x1, y1, x2, y2, *col.correct_bounding_box(*obj)):
                                 # print("Sensor {}:".format(s), *sensor, *obj)
                                 # Find the line intersection.
+                                coll_checks += 1
                                 intersection = col.lineline(*sensor, *obj, True)
                                 if intersection:
+                                    hcoll_checks += 1
                                     # Add the sensor data to the car object.
                                     car.sensors[s] = distance(sensor[0], sensor[1], *intersection, True) / Car.sensor_max_dist[s]
                                     collision = True
                                     if self.draw_sensor: self.collision_points.append(intersection)
 
-                        # If enabled, detect car collision here
-                        if self.car_coll:
-                            # Implement car collision here (Optional)
-                            pass
-
                 # Draw the dot at the tip of the sensor if collision is not detected.
                 if self.draw_sensor and not collision:
                     self.collision_points.append([sensor[2], sensor[3]])
+
+        # g.ui_text += "Active cars:{}\nCollChecks:{}\nH-CollChecks:{}\n".format(counter, coll_checks, hcoll_checks)
+        # print("col_time: {}ms".format(round((time() - start) * 1000, 2)))
     
     def update(self):
         self.update_cars()
 
     def on_draw(self):
+        # start = time()
         for car in self.cars:
             car.on_draw()
 
-        if self.draw_sensor:
+        # print("draw_time: {}ms".format(round((time() - start) * 1000, 2)))
+        if self.draw_sensor and len(self.collision_points) != 0:
             arcade.draw_points(self.collision_points, arcade.color.GRAY, 3)
