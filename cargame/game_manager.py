@@ -29,7 +29,7 @@ class MainGame:
         # Create 2 UIs. For build mode and simulation mode
         self.build_ui = ui.GameUI(self.cam)
         self.sim_ui = ui.GameUI(self.cam)
-        self.ui = self.sim_ui
+        self.ui = self.build_ui
 
         # Text for showing FPS
         self.fps_text = ""
@@ -44,15 +44,37 @@ class MainGame:
 
         # Add buttons to the UI here
         self.sim_ui.buttons = [
-            ui.Button("Play", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 50, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.car_manager.set_paused(False), "./cargame/sprites/play.png"),
-            ui.Button("Pause", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.car_manager.set_paused(True), "./cargame/sprites/pause.png"),
+            ui.Button("Play", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 50, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.pause_sim(False), "./cargame/sprites/play.png"),
+            ui.Button("Pause", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.pause_sim(True), "./cargame/sprites/pause.png"),
             ui.Button("Skip", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh")),
             ui.Button("Exit Sim", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 260, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh")),
             ui.Button("Save Car", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 330, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh"))
         ]
 
+        self.build_button1 = [
+            ui.Button("Run Sim!", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 50, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.pause_sim(False), "./cargame/sprites/play.png"),
+            ui.Button("Wall+", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.pause_sim(True), "./cargame/sprites/pause.png"),
+            ui.Button("Wall-", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh")),
+            ui.Button("Set Spawn", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 260, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh")),
+            ui.Button("Next>", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 330, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_ui)
+        ]
+
+        self.build_button2 = [
+            ui.Button("<Back", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 50, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_ui, "./cargame/sprites/play.png"),
+            ui.Button("Save Track", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.pause_sim(True), "./cargame/sprites/pause.png"),
+            ui.Button("Load Track", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh"))
+        ]
+
+        self.build_ui.buttons = self.build_button1
+
         # Schedule fps update
         arcade.schedule(self.update_fps_counter, 0.5)
+
+    def pause_sim(self, state):
+        self.car_manager.set_paused(state)
+
+    def switch_ui(self):
+        self.build_ui.buttons = self.build_button1 if self.build_ui.buttons == self.build_button2 else self.build_button2
 
     def update(self, delta):
         """ Will be run every frame """
