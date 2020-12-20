@@ -107,5 +107,6 @@ class TrackManager:
 
     def on_draw(self):
         """ Draw """
-        self.draw_debug_squares()
-        arcade.draw_lines(self.track_poly, (20, 20, 20), TrackManager.track_width)
+        if len(self.track_poly) > 0:
+            self.draw_debug_squares()
+            arcade.draw_lines(self.track_poly, (20, 20, 20), TrackManager.track_width)

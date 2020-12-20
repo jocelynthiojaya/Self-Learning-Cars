@@ -270,7 +270,7 @@ class Car:
 class CarManager:
     """ Contains many car """
 
-    def __init__(self, trackmanager, x_begin, y_begin, direction, count):
+    def __init__(self, trackmanager, x_begin=0, y_begin=0, direction=0, count=0):
         """ Inits the Carmanager, needs a trackmanager as a parameter to calculate the collisions"""
 
         self.trackmanager = trackmanager
@@ -294,6 +294,9 @@ class CarManager:
         # Set the initial directions
         self.direction = direction
 
+        # Paused state
+        self.paused = False
+
         # Create the cars
         for _ in range(count):
             car = Car(x_begin, y_begin)
@@ -305,12 +308,15 @@ class CarManager:
     def insert_car(self, car):
         self.cars.append(car)
 
+    def set_paused(self, state):
+        self.paused = state
+
     def update_cars(self):
         """ Does all the collision algorithms for the car, and the update mechanism with the track also. """
         """ Reconstructs and handles the collision on the fly, to be more efficient """
 
         # Run the cars if the sim is not paused.
-        if g.paused: return
+        if self.paused: return
 
         if self.draw_sensor: self.collision_points = []
 

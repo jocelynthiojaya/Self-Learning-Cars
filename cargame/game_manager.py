@@ -1,5 +1,5 @@
 from cargame.camera import Camera, Grid
-from cargame.ui import GameUI
+import cargame.ui as ui
 from cargame.car import Car, CarManager
 from cargame.track import TrackManager
 import cargame.globals as g
@@ -12,6 +12,7 @@ class MainGame:
         """
         TODO:
         - Register buttons from here
+        - Buttons function registered function belongs here.
         - Store every class here
         - Connect functions from here
         """
@@ -24,34 +25,31 @@ class MainGame:
         )
         # Grid and UI Object
         self.grid = Grid(self.cam)
-        self.ui = GameUI(self.cam)
+
+        # Create 2 UIs. For build mode and simulation mode
+        self.build_ui = ui.GameUI(self.cam)
+        self.sim_ui = ui.GameUI(self.cam)
+        self.ui = self.sim_ui
 
         # Text for showing FPS
         self.fps_text = ""
 
         # Add the new track manager
         self.track_manager = TrackManager()
-        self.track_manager.add_track([
-            [150, 150],
-            [500, 150],
-            [700, 300],
-            [1100, 300],
-            [1400, 0],
-            [1900, 0],
-            [1900, 150],
-            [1400, 150],
-            [1150, 400],
-            [650, 400],
-            [450, 250],
-            [150, 250],
-            [150, 150]
-        ])
-
-        # Create the new car manager
-        self.car_manager = CarManager(self.track_manager, 200, 200, 0, 20)
 
         # State of the game. 0 is for build mode, 1 is for simulation mode
         self.state = 0
+
+        self.car_manager = CarManager(self.track_manager)
+
+        # Add buttons to the UI here
+        self.sim_ui.buttons = [
+            ui.Button("Play", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 50, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.car_manager.set_paused(False), "./cargame/sprites/play.png"),
+            ui.Button("Pause", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.car_manager.set_paused(True), "./cargame/sprites/pause.png"),
+            ui.Button("Skip", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh")),
+            ui.Button("Exit Sim", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 260, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh")),
+            ui.Button("Save Car", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 330, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh"))
+        ]
 
         # Schedule fps update
         arcade.schedule(self.update_fps_counter, 0.5)
@@ -64,7 +62,6 @@ class MainGame:
         # Updates the delta time on globals
         g.delta = delta
 
-        self.car_manager.update()
         g.ui_text += self.fps_text
         self.ui.set_text(g.ui_text.strip())
 
@@ -77,8 +74,6 @@ class MainGame:
 
         # Draw the track manager
         self.track_manager.on_draw()
-
-        self.car_manager.on_draw()
 
         # Draws the fps counter
         self.ui.on_draw()

@@ -76,17 +76,7 @@ class GameUI():
         self.ui_text = ""
 
         # The buttons inside the ui
-        self.buttons = [
-            Button("Play", g.conf["screen_width"]/2 - UI_WIDTH/2 + 50, Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.sim_pause(False), "./cargame/sprites/play.png"),
-            Button("Pause", g.conf["screen_width"]/2 - UI_WIDTH/2 + 120, Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.sim_pause(True), "./cargame/sprites/pause.png"),
-            Button("Skip", g.conf["screen_width"]/2 - UI_WIDTH/2 + 190, Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh")),
-            Button("Exit Sim", g.conf["screen_width"]/2 - UI_WIDTH/2 + 260, Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh")),
-            Button("Save Car", g.conf["screen_width"]/2 - UI_WIDTH/2 + 330, Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh"))
-        ]
-
-    def sim_pause(self, state):
-        """ Pause the simulation """
-        g.paused = state
+        self.buttons = []
 
     def set_text(self, text):
         """ Sets the new UI Text """

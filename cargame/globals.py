@@ -15,6 +15,3 @@ delta = 0
 
 # Display text to the UI
 ui_text = ""
-
-# Paused
-paused = False
