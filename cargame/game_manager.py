@@ -34,6 +34,21 @@ class MainGame:
 
         # Add the new track manager
         self.track_manager = TrackManager()
+        self.track_manager.add_track([
+            [150, 150],
+            [500, 150],
+            [700, 300],
+            [1100, 300],
+            [1400, 0],
+            [1900, 0],
+            [1900, 150],
+            [1400, 150],
+            [1150, 400],
+            [650, 400],
+            [450, 250],
+            [150, 250],
+            [150, 150]
+        ])
 
         # Mouse pos
         self.mx = 0
@@ -65,7 +80,7 @@ class MainGame:
         self.build_button1 = [
             ui.Button("Run Sim!", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 50, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Run sim"), "./cargame/sprites/play.png"),
             ui.Button("Wall+", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_add_wall_mode, "./cargame/sprites/pause.png"),
-            ui.Button("Wall-", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh")),
+            ui.Button("Wall-", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_del_wall_mode),
             ui.Button("Set Spawn", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 260, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh")),
             ui.Button("Next>", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 330, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_ui)
         ]
@@ -98,15 +113,14 @@ class MainGame:
         self.cam.set_can_zoom(True)
 
     def switch_add_wall_mode(self):
-        # Helper function to change the game state to wall mode
+        # Helper function to change the game state to wall mode, disable zoom.
         self.state = 1
-        
-        # Disable zoom
         self.cam.set_can_zoom(False)
 
-    def add_wall_mode(self):
-        # Mode when adding walls
-        pass
+    def switch_del_wall_mode(self):
+        # Mode when deleting wall, disable zoom
+        self.state = 2
+        self.cam.set_can_zoom(False)
 
     def update(self, delta):
         """ Will be run every frame """
@@ -136,7 +150,7 @@ class MainGame:
 
         if self.state == 1:
             # Draw instruction
-            arcade.draw_text("Press bababooey, escape to quit this mode.", camx + 5, camy + 5, (0, 0, 0))
+            arcade.draw_text("Press [LEFT MOUSE] to add road, [ENTER] to add the roads, [ESC] to quit this mode.", camx + 5, camy + 5, (0, 0, 0))
             
             # Draw the temporary road
             arcade.draw_line_strip(self.temp_road, (0, 120, 0), 5)
@@ -144,6 +158,10 @@ class MainGame:
             # Draw the last road leading to the mouse
             if len(self.temp_road) > 0:
                 arcade.draw_line(*self.temp_road[-1], self.mx + camx, self.my + camy, (0, 0, 120), 5)
+        
+        if self.state == 2:
+            # Instruction
+            arcade.draw_text("[LEFT MOUSE] on the walls to delete them, [ESC] to quit this mode.", camx + 5, camy + 5, (0, 0, 0))
 
         self.cam.update_viewport()
 
@@ -175,6 +193,10 @@ class MainGame:
                 self.track_manager.add_track(self.temp_road)
                 self.temp_road = []
 
+        if self.state == 2:
+            if symbol == arcade.key.ESCAPE:
+                self.switch_build_mode()
+
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         # Handle UI mouse click, and
         # If the mouse click is not in the GUI element
@@ -184,6 +206,11 @@ class MainGame:
                 if button == arcade.MOUSE_BUTTON_LEFT:
                     # Add a new road to the temp_road
                     self.temp_road.append([camx + x, camy + y])
+
+            if self.state == 2:
+                if button == arcade.MOUSE_BUTTON_LEFT:
+                    # Delete the road intersecting within the cursor.
+                    self.track_manager.del_track_at_pos(camx + x, camy + y, 5)
 
         # Update mouse pos
         self.mx = x

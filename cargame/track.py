@@ -95,6 +95,40 @@ class TrackManager:
             self.track_poly.append([lines[0], lines[1]])
             self.track_poly.append([lines[2], lines[3]])
 
+    def del_track_at_pos(self, x, y, search_radius):
+        """ Tries to delete a single line from a position.
+        If it is sucesfully deleted returns true. """
+
+        size = g.conf["col_grid_size"]
+        # Choose the collision grid
+        coll = self.coll_dict.get((int(x // size), int(y // size)))
+
+        # If there is no collision, delete
+        if not coll:
+            return
+
+        # Iterate collisions and choose.
+        to_del = None
+        for c in coll:
+            # Check for exact collisions
+            if col.linerect(*c, x-search_radius, y-search_radius, x+search_radius, y+search_radius):
+                # Mark to delete
+                to_del = c
+                break
+        
+        # If the track is found, iterate track list and delete it.
+        if to_del:
+            for i in range(len(self.tracks)):
+                if to_del == self.tracks[i]:
+                    # Delete from the track, and reconstruct everything
+                    self.tracks.pop(i)
+                    self.reconstruct_collisions()
+                    self.reconstruct_track_poly()
+                    return True
+        
+        return False
+
+
     def update(self):
         """ Updates every frame """
 

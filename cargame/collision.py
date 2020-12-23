@@ -159,3 +159,7 @@ def polypoly(poly1, poly2):
         if collision: return True
 
     return False
+
+def pointrect(x, y, rx1, ry1, rx2, ry2):
+    """ Fast """
+    return x > rx1 and x < rx2 and y > ry1 and y < ry2

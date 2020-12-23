@@ -93,6 +93,7 @@ class GameUI():
         if (x > g.conf["screen_width"]/2 - UI_WIDTH/2 and x < g.conf["screen_width"]/2 + UI_WIDTH/2 and
             y > Y_UI_CENTER - UI_HEIGHT/2 and y < Y_UI_CENTER + UI_HEIGHT/2):
             click_ui = True
+            
         if button == arcade.MOUSE_BUTTON_LEFT:
             # Check every button whether the mouse is within the button box.
             for btn in self.buttons:
