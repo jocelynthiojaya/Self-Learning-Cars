@@ -51,6 +51,21 @@ class TrackManager:
         self.reconstruct_collisions()
         self.reconstruct_track_poly()
 
+    def add_raw_track(self, track):
+        """ Add track based on a raw input, (This is only used for save files) """
+        self.tracks = track
+
+        # Reconstruct everything
+        self.reconstruct_collisions()
+        self.reconstruct_track_poly()
+
+    def clear_track(self):
+        """ Clears all the track in the object """
+        self.tracks = []
+        # Reconstruct everything
+        self.reconstruct_collisions()
+        self.reconstruct_track_poly()
+
     def reconstruct_collisions(self):
         """ Reconstructs all the static collisions """
         

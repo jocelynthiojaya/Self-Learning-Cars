@@ -5,6 +5,9 @@ from cargame.track import TrackManager
 import cargame.globals as g
 import cargame.util as util
 import arcade
+import json
+
+from tkinter import filedialog, Tk
 
 class MainGame:
 
@@ -14,6 +17,11 @@ class MainGame:
         - Store every class here
         - Connect functions from here
         """
+
+        # only for file window handling purposes. Unused.
+        self.tk_ctx = Tk()
+        self.tk_ctx.withdraw()
+    
         # Camera object
         self.cam = Camera(
             g.conf["c_bound_left"],
@@ -76,8 +84,8 @@ class MainGame:
 
         self.build_button2 = [
             ui.Button("<Back", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 50, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_ui, "./cargame/sprites/play.png"),
-            ui.Button("Save Track", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.pause_sim(True), "./cargame/sprites/pause.png"),
-            ui.Button("Load Track", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh"))
+            ui.Button("Save Track", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.save_track_file, "./cargame/sprites/pause.png"),
+            ui.Button("Load Track", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.load_track_file)
         ]
 
         # Set the build ui buttons
@@ -85,6 +93,24 @@ class MainGame:
 
         # Schedule fps update
         arcade.schedule(self.update_fps_counter, 0.5)
+
+    def save_track_file(self):
+        """ Saves the track into a file """
+        # Saves the track and the car spawn location
+        j_file = json.dumps({"track": self.track_manager.tracks, "spawn": self.car_spawn}, indent=2)
+        with filedialog.asksaveasfile("w+", defaultextension=".json", filetypes=[('JSON file', '.json')]) as file:
+            file.write(j_file)
+
+    def load_track_file(self):
+        with filedialog.askopenfile("r", defaultextension=".json", filetypes=[('JSON file', '.json')]) as file:
+            j_file = json.loads(file.read())
+
+            # Clears the current track, and adds new tracks from the json file
+            self.track_manager.clear_track()
+            self.track_manager.add_raw_track(j_file.get("track"))
+
+            # Set the car spawn location
+            self.car_spawn = j_file.get("spawn")
 
     def pause_sim(self, state):
         self.car_manager.set_paused(state)
