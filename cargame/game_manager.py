@@ -61,13 +61,13 @@ class MainGame:
             ui.Button("Play", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 50, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.pause_sim(False), "./cargame/sprites/play.png"),
             ui.Button("Pause", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.pause_sim(True), "./cargame/sprites/pause.png"),
             ui.Button("Skip", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh")),
-            ui.Button("Exit Sim", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 260, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh")),
+            ui.Button("Exit Sim", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 260, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_build_mode),
             ui.Button("Save Car", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 330, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh"))
         ]
 
         # There are 2 build ui buttons. This is so that the user can scroll through a button list.
         self.build_button1 = [
-            ui.Button("Run Sim!", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 50, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Run sim"), "./cargame/sprites/play.png"),
+            ui.Button("Run Sim!", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 50, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_run_sim, "./cargame/sprites/play.png"),
             ui.Button("Wall+", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_add_wall_mode, "./cargame/sprites/pause.png"),
             ui.Button("Wall-", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_del_wall_mode),
             ui.Button("Set Spawn", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 260, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_set_car_spawn),
@@ -101,6 +101,9 @@ class MainGame:
         # Reenable zoom
         self.cam.set_can_zoom(True)
 
+        # Set the ui to build
+        self.ui = self.build_ui
+
     def switch_add_wall_mode(self):
         # Helper function to change the game state to wall mode, disable zoom.
         self.state = 1
@@ -114,6 +117,18 @@ class MainGame:
     def switch_set_car_spawn(self):
         # Set the mode for setting car spawn
         self.state = 3
+        self.cam.set_can_zoom(True)
+
+    def switch_run_sim(self):
+        # Run the simulation!
+        self.state = 4
+        self.car_manager = CarManager(self.track_manager, *self.car_spawn, count=20)
+
+        # Enable zoom
+        self.cam.set_can_zoom(True)
+
+        # Change UI
+        self.ui = self.sim_ui
 
     def update(self, delta):
         """ Will be run every frame """
@@ -125,6 +140,10 @@ class MainGame:
 
         g.ui_text += self.fps_text
         self.ui.set_text(g.ui_text.strip())
+
+        # Update the cars if state is run simulation
+        if self.state == 4:
+            self.car_manager.update()
 
     def on_draw(self):
         # Clear the screen and start drawing
@@ -138,6 +157,10 @@ class MainGame:
 
         # Draw the car spawn point
         arcade.draw_arc_filled(*self.car_spawn, 32, 32, (5, 5, 5), -60, 240)
+
+        # Draws all the car if simulation is runned
+        if self.state == 4:
+            self.car_manager.on_draw()
 
         camx, _, camy, _ = arcade.get_viewport()
 
