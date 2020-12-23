@@ -35,10 +35,22 @@ class MainGame:
         # Add the new track manager
         self.track_manager = TrackManager()
 
-        # State of the game. 0 is for build mode, 1 is for simulation mode
+        # Mouse pos
+        self.mx = 0
+        self.my = 0
+
+        # State of the game.
+        # 0 = build mode
+        # 1 = add wall mode
+        # 2 = delete wall mode
+        # 3 = simulation mode
         self.state = 0
 
         self.car_manager = CarManager(self.track_manager)
+
+        # Temporary road when in add wall mode
+        # These stores an array of points
+        self.temp_road = []
 
         # Add buttons to the UI here
         self.sim_ui.buttons = [
@@ -52,7 +64,7 @@ class MainGame:
         # There are 2 build ui buttons. This is so that the user can scroll through a button list.
         self.build_button1 = [
             ui.Button("Run Sim!", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 50, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Run sim"), "./cargame/sprites/play.png"),
-            ui.Button("Wall+", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Brun"), "./cargame/sprites/pause.png"),
+            ui.Button("Wall+", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_add_wall_mode, "./cargame/sprites/pause.png"),
             ui.Button("Wall-", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh")),
             ui.Button("Set Spawn", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 260, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh")),
             ui.Button("Next>", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 330, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_ui)
@@ -76,6 +88,25 @@ class MainGame:
     def switch_ui(self):
         # Switch the button list
         self.build_ui.buttons = self.build_button1 if self.build_ui.buttons == self.build_button2 else self.build_button2
+
+    def switch_build_mode(self):
+        # Return to normal build mode
+        self.temp_road = []
+        self.state = 0
+        
+        # Reenable zoom
+        self.cam.set_can_zoom(True)
+
+    def switch_add_wall_mode(self):
+        # Helper function to change the game state to wall mode
+        self.state = 1
+        
+        # Disable zoom
+        self.cam.set_can_zoom(False)
+
+    def add_wall_mode(self):
+        # Mode when adding walls
+        pass
 
     def update(self, delta):
         """ Will be run every frame """
@@ -101,6 +132,19 @@ class MainGame:
         # Draws the fps counter
         self.ui.on_draw()
 
+        camx, _, camy, _ = arcade.get_viewport()
+
+        if self.state == 1:
+            # Draw instruction
+            arcade.draw_text("Press bababooey, escape to quit this mode.", camx + 5, camy + 5, (0, 0, 0))
+            
+            # Draw the temporary road
+            arcade.draw_line_strip(self.temp_road, (0, 120, 0), 5)
+
+            # Draw the last road leading to the mouse
+            if len(self.temp_road) > 0:
+                arcade.draw_line(*self.temp_road[-1], self.mx + camx, self.my + camy, (0, 0, 120), 5)
+
         self.cam.update_viewport()
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float, buttons: int, modifiers: int):
@@ -110,6 +154,8 @@ class MainGame:
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         """ Nothing yet """
+        self.mx = x
+        self.my = y
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         """ Controls the zoom """
@@ -121,8 +167,27 @@ class MainGame:
         if symbol == arcade.key.GRAVE:
             self.cam.reset_zoom()
 
+        if self.state == 1:
+            if symbol == arcade.key.ESCAPE:
+                self.switch_build_mode()
+            elif symbol == arcade.key.ENTER:
+                # Insert all the temp road into the road manager, then clear it.
+                self.track_manager.add_track(self.temp_road)
+                self.temp_road = []
+
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
-        self.ui.on_click(x, y, button)
+        # Handle UI mouse click, and
+        # If the mouse click is not in the GUI element
+        camx, _, camy, _ = arcade.get_viewport()
+        if not self.ui.on_click(x, y, button):
+            if self.state == 1:
+                if button == arcade.MOUSE_BUTTON_LEFT:
+                    # Add a new road to the temp_road
+                    self.temp_road.append([camx + x, camy + y])
+
+        # Update mouse pos
+        self.mx = x
+        self.my = y
 
     def update_fps_counter(self, delta_time):
         """ Used by scheduling to update the fps """
