@@ -29,6 +29,9 @@ class Camera:
         # The zoom of the main canvas
         self.zoom = 1
 
+        # Whether zoom is enabled.
+        self.can_zoom = True
+
         # Marker when camera port will be updated this frame
         self.moved = False
 
@@ -78,6 +81,9 @@ class Camera:
 
     def update_zoom(self, zoom, anchor_x, anchor_y):
         """ Updates the zoom of the main canvas """
+
+        # Check first whether zoom is enabled
+        if not self.can_zoom: return
 
         # Mark camera as moved
         self.moved = True
@@ -146,6 +152,13 @@ class Camera:
     def get_viewport(self):
         """ Gets the size of the viewport """
         return (self.right - self.x, self.top - self.y)
+
+    def reset_zoom(self):
+        """ Reset the zoom of the camera to 1x """
+        self.update_zoom(1, conf["screen_width"]/2, conf["screen_height"]/2)
+    
+    def set_can_zoom(self, state):
+        self.can_zoom = state
 
 class Grid():
 
