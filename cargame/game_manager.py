@@ -44,8 +44,11 @@ class MainGame:
         # Add the new track manager
         self.track_manager = TrackManager()
         
-        # Car spawner location
+        # Car spawner location and angle
         self.car_spawn = [0, 0]
+        self.car_angle = 0
+
+        self.temp_car_angle = 0
 
         # Mouse pos
         self.mx = 0
@@ -104,7 +107,11 @@ class MainGame:
     def save_track_file(self):
         """ Saves the track into a file """
         # Saves the track and the car spawn location
-        j_file = json.dumps({"track": self.track_manager.tracks, "spawn": self.car_spawn}, indent=2)
+        j_file = json.dumps({
+                "track": self.track_manager.tracks,
+                "spawn": self.car_spawn,
+                "angle": self.car_angle
+            }, indent=2)
 
         # Save to the file
         with filedialog.asksaveasfile("w+", defaultextension=".json", filetypes=[('JSON file', '.json')], initialdir="./saves") as file:
@@ -116,10 +123,11 @@ class MainGame:
 
             # Clears the current track, and adds new tracks from the json file
             self.track_manager.clear_track()
-            self.track_manager.add_raw_track(j_file.get("track"))
+            self.track_manager.add_raw_track(j_file.get("track"), [])
 
-            # Set the car spawn location
-            self.car_spawn = j_file.get("spawn")
+            # Set the car spawn location and angle
+            self.car_spawn = j_file.get("spawn", [0, 0])
+            self.car_angle = j_file.get("angle", 0)
 
     def pause_sim(self, state):
         self.car_manager.set_paused(state)
@@ -152,12 +160,16 @@ class MainGame:
     def switch_set_car_spawn(self):
         # Set the mode for setting car spawn
         self.state = 3
-        self.cam.set_can_zoom(True)
+        self.cam.set_can_zoom(False)
+        
+        # Reset car angle
+        self.car_angle = 0
+        self.temp_car_angle = 0
 
     def switch_run_sim(self):
         # Run the simulation!
         self.state = 4
-        self.car_manager = CarManager(self.track_manager, *self.car_spawn, count=20)
+        self.car_manager = CarManager(self.track_manager, *self.car_spawn, direction=self.car_angle, count=20)
 
         # Enable zoom
         self.cam.set_can_zoom(True)
@@ -190,8 +202,9 @@ class MainGame:
         # Draw the track manager
         self.track_manager.on_draw()
 
-        # Draw the car spawn point
+        # Draw the car spawn point and arrow
         arcade.draw_arc_filled(*self.car_spawn, 32, 32, (5, 5, 5), -60, 240)
+        util.draw_arrow(*self.car_spawn, 45, self.car_angle, (66, 135, 245), 4, 16)
 
         # Draws all the car if simulation is runned
         if self.state == 4:
@@ -216,7 +229,10 @@ class MainGame:
 
         if self.state == 3:
             # Instruction
-            arcade.draw_text("[LEFT MOUSE] to set where the cars will spawn, [ESC] to quit this mode.", camx + 5, camy + 5, (0, 0, 0))
+            arcade.draw_text("[LEFT MOUSE] to set where the cars will spawn, [SCROLL MOUSE] to change spawn direction, [ESC] to quit this mode.", camx + 5, camy + 5, (0, 0, 0))
+
+            # Draw the arrow
+            util.draw_arrow(self.mx + camx, self.my + camy, 45, self.temp_car_angle, (75, 187, 189), 4, 16)
 
         # Draws the UI, and update viewport
         self.ui.on_draw()
@@ -224,6 +240,8 @@ class MainGame:
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float, buttons: int, modifiers: int):
         """ Updates the camera if dragged. """
+        self.mx = x
+        self.my = y
         if buttons == arcade.MOUSE_BUTTON_RIGHT:
             self.cam.handle_pan(dx, dy)
 
@@ -235,6 +253,10 @@ class MainGame:
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         """ Controls the zoom """
         self.cam.handle_zoom(x, y, scroll_y)
+
+        if self.state == 3:
+            # Rotate the car spawn angle
+            self.temp_car_angle += scroll_y * 5
 
     def on_key_press(self, symbol: int, modifiers: int):
 
@@ -277,6 +299,7 @@ class MainGame:
                 if button == arcade.MOUSE_BUTTON_LEFT:
                     # Delete the road intersecting within the cursor.
                     self.car_spawn = [camx + x, camy + y]
+                    self.car_angle = self.temp_car_angle
                     self.switch_build_mode()
 
         # Update mouse pos

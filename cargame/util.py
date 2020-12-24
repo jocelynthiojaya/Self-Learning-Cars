@@ -1,6 +1,7 @@
 import arcade
 import numpy as np
 import cargame.globals as g
+import numpy as np
 
 def invlerp(a, b, v):
     """ Inverse lerp.
@@ -17,15 +18,42 @@ def invlerp(a, b, v):
 
 def draw_rectangle_rounded(center_x, center_y, width, height, radius, color):
     """ Custom function to draw a rounded rectangle """
+    shape_list = arcade.ShapeElementList()
+
     # Draw the 2 rectangles
-    arcade.draw_rectangle_filled(center_x, center_y, width, height - radius*2, color)
-    arcade.draw_rectangle_filled(center_x, center_y, width - radius*2, height, color)
+    shape_list.append(arcade.create_rectangle_filled(center_x, center_y, width, height - radius*2, color))
+    shape_list.append(arcade.create_rectangle_filled(center_x, center_y, width - radius*2, height, color))
 
     # Draw the circle border
-    arcade.draw_circle_filled(center_x - width/2 + radius, center_y - height/2 + radius, radius, color)
-    arcade.draw_circle_filled(center_x - width/2 + radius, center_y + height/2 - radius, radius, color)
-    arcade.draw_circle_filled(center_x + width/2 - radius, center_y - height/2 + radius, radius, color)
-    arcade.draw_circle_filled(center_x + width/2 - radius, center_y + height/2 - radius, radius, color)
+    shape_list.append(arcade.create_ellipse(center_x - width/2 + radius, center_y - height/2 + radius, radius, radius, color))
+    shape_list.append(arcade.create_ellipse(center_x - width/2 + radius, center_y + height/2 - radius, radius, radius, color))
+    shape_list.append(arcade.create_ellipse(center_x + width/2 - radius, center_y - height/2 + radius, radius, radius, color))
+    shape_list.append(arcade.create_ellipse(center_x + width/2 - radius, center_y + height/2 - radius, radius, radius, color))
+
+    # Draw
+    shape_list.draw()
+
+def draw_arrow(center_x, center_y, length, direction, color, line_width=1, arrow_length=10):
+    """ Draws an arrow, direction is in degrees """
+    # Get the sins and coses
+    sind = np.sin(np.radians(direction))
+    cosd = np.cos(np.radians(direction))
+
+    # Divide by 2
+    length /= 2
+
+    # Edge point of the line
+    edgex = center_x + length*cosd
+    edgey = center_y + length*sind
+
+    arcade.draw_lines([
+        [center_x - length*cosd, center_y - length*sind],
+        [edgex, edgey],
+        [edgex, edgey],
+        [edgex + arrow_length*np.cos(np.radians(direction+135)), edgey + arrow_length*np.sin(np.radians(direction+135))],
+        [edgex, edgey],
+        [edgex + arrow_length*np.cos(np.radians(direction-135)), edgey + arrow_length*np.sin(np.radians(direction-135))]
+    ], color, line_width)
 
 def rotation_matrix(x, y, theta):
     """ Calculate the rotation matrix. Origin is assumed to be (0, 0)
