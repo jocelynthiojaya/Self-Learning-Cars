@@ -123,7 +123,7 @@ class MainGame:
 
             # Clears the current track, and adds new tracks from the json file
             self.track_manager.clear_track()
-            self.track_manager.add_raw_track(j_file.get("track"), [])
+            self.track_manager.add_raw_track(j_file.get("track", []))
 
             # Set the car spawn location and angle
             self.car_spawn = j_file.get("spawn", [0, 0])
