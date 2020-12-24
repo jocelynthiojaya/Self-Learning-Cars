@@ -15,7 +15,7 @@ TEXT_MARGIN = 5
 
 class Button():
 
-    width = 50
+    width = 56
     height = 70
     
     # How many seconds is the button down after pressing
@@ -38,6 +38,9 @@ class Button():
         self.color = color
         self.pressed_color = pressed_color
 
+        # Determine the color based on the button color brightness
+        self.text_color = (255, 255, 255) if util.get_luminance(color) < 128 else (0, 0, 0)
+
         # Marker variable to indicate when button is pressed for animations.
         self.down_left = 0
 
@@ -59,10 +62,12 @@ class Button():
         """ Needs the camx and camy coordinates to draw it relatively """
         if self.down_left <= 0:
             arcade.draw_rectangle_filled(camx + self.x + Button.width/2, camy + self.y + Button.height/2, Button.width, Button.height, self.color)
+            # util.draw_rectangle_rounded(camx + self.x + Button.width/2, camy + self.y + Button.height/2, Button.width, Button.height, 4, self.color)
         else:
             arcade.draw_rectangle_filled(camx + self.x + Button.width/2, camy + self.y + Button.height/2, Button.width, Button.height, self.pressed_color)
+            # util.draw_rectangle_rounded(camx + self.x + Button.width/2, camy + self.y + Button.height/2, Button.width, Button.height, 4, self.color)
             self.down_left -= g.delta
-        arcade.draw_text(self.text, camx + self.x, camy + self.y + 3, (255, 255, 255), 10, Button.width, "center")
+        arcade.draw_text(self.text, camx + self.x, camy + self.y + 3, self.text_color, 10, Button.width, "center")
         if self.sprite:
             self.sprite.center_x = camx + self.scenter_x
             self.sprite.center_y = camy + self.scenter_y

@@ -15,8 +15,8 @@ class MainGame:
     def __init__(self):
         """
         TODO:
-        - Store every class here
-        - Connect functions from here
+        - ShapeElement cars
+        - ShapeElement GUI
         """
 
         # only for file window handling purposes. Unused.
@@ -70,26 +70,26 @@ class MainGame:
 
         # Add buttons to the UI here
         self.sim_ui.buttons = [
-            ui.Button("Play", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 50, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.pause_sim(False), "./cargame/sprites/play.png"),
-            ui.Button("Pause", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : self.pause_sim(True), "./cargame/sprites/pause.png"),
-            ui.Button("Skip", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh")),
-            ui.Button("Exit Sim", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 260, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_build_mode),
-            ui.Button("Save Car", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 330, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), lambda : print("Bruh"))
+            ui.Button("Play", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 50, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), lambda : self.pause_sim(False), "./cargame/sprites/play.png"),
+            ui.Button("Pause", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), lambda : self.pause_sim(True), "./cargame/sprites/pause.png"),
+            ui.Button("Skip", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), lambda : print("Bruh"), "./cargame/sprites/skip.png"),
+            ui.Button("Exit Sim", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 260, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), self.switch_build_mode, "./cargame/sprites/exit.png"),
+            ui.Button("Save Car", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 330, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), lambda : print("Bruh"), "./cargame/sprites/savecar.png")
         ]
 
         # There are 2 build ui buttons. This is so that the user can scroll through a button list.
         self.build_button1 = [
-            ui.Button("Run Sim!", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 50, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_run_sim, "./cargame/sprites/play.png"),
-            ui.Button("Wall+", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_add_wall_mode, "./cargame/sprites/pause.png"),
-            ui.Button("Wall-", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_del_wall_mode),
-            ui.Button("Set Spawn", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 260, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_set_car_spawn),
-            ui.Button("Next>", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 330, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_ui)
+            ui.Button("Run Sim!", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 50, ui.Y_UI_CENTER, (40, 57, 122), (30, 38, 105), self.switch_run_sim, "./cargame/sprites/runsim.png"),
+            ui.Button("Wall+", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), self.switch_add_wall_mode, "./cargame/sprites/addtrack.png"),
+            ui.Button("Wall-", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), self.switch_del_wall_mode, "./cargame/sprites/deltrack.png"),
+            ui.Button("Set Spawn", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 260, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), self.switch_set_car_spawn, "./cargame/sprites/spawn.png"),
+            ui.Button("Next>", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 330, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), self.switch_ui, "./cargame/sprites/next.png")
         ]
 
         self.build_button2 = [
-            ui.Button("<Back", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 50, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.switch_ui, "./cargame/sprites/play.png"),
-            ui.Button("Save Track", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.save_track_file, "./cargame/sprites/pause.png"),
-            ui.Button("Load Track", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (245, 71, 71), (225, 51, 51), self.load_track_file)
+            ui.Button("<Back", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 50, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), self.switch_ui, "./cargame/sprites/back.png"),
+            ui.Button("Save Track", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), self.save_track_file, "./cargame/sprites/loadtrack.png"),
+            ui.Button("Load Track", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), self.load_track_file, "./cargame/sprites/savetrack.png")
         ]
 
         # Set the build ui buttons
@@ -203,8 +203,9 @@ class MainGame:
         self.track_manager.on_draw()
 
         # Draw the car spawn point and arrow
-        arcade.draw_arc_filled(*self.car_spawn, 32, 32, (5, 5, 5), -60, 240)
-        util.draw_arrow(*self.car_spawn, 45, self.car_angle, (66, 135, 245), 4, 16)
+        arcade.draw_text("Car spawn", self.car_spawn[0] - 29, self.car_spawn[1] + 18, (0, 0, 0))
+        arcade.draw_arc_filled(*self.car_spawn, 32, 32, (132, 36, 140), -60, 240)
+        util.draw_arrow(*self.car_spawn, 45, self.car_angle, (235, 174, 45), 4, 16)
 
         # Draws all the car if simulation is runned
         if self.state == 4:

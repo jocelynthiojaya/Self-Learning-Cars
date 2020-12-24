@@ -80,3 +80,7 @@ def clamp(val, min, max):
 def distance(x1, y1, x2, y2, root=True):
     """ Pythagorean theorem. can be rooted can be not for performance """
     return ((x2-x1)**2 + (y2-y1)**2)**0.5 if root else (x2-x1)**2 + (y2-y1)**2
+
+def get_luminance(color):
+    """ Return the luminance from a RGB value 0-255 """
+    return (0.2126*color[0]) + (0.7152*color[1]) + (0.0722*color[2])
