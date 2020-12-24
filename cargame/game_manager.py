@@ -6,6 +6,7 @@ import cargame.globals as g
 import cargame.util as util
 import arcade
 import json
+from os import mkdir
 
 from tkinter import filedialog, Tk
 
@@ -94,15 +95,23 @@ class MainGame:
         # Schedule fps update
         arcade.schedule(self.update_fps_counter, 0.5)
 
+        # Make directory of saves
+        try:
+            mkdir("./saves")
+        except OSError:
+            pass
+
     def save_track_file(self):
         """ Saves the track into a file """
         # Saves the track and the car spawn location
         j_file = json.dumps({"track": self.track_manager.tracks, "spawn": self.car_spawn}, indent=2)
-        with filedialog.asksaveasfile("w+", defaultextension=".json", filetypes=[('JSON file', '.json')]) as file:
+
+        # Save to the file
+        with filedialog.asksaveasfile("w+", defaultextension=".json", filetypes=[('JSON file', '.json')], initialdir="./saves") as file:
             file.write(j_file)
 
     def load_track_file(self):
-        with filedialog.askopenfile("r", defaultextension=".json", filetypes=[('JSON file', '.json')]) as file:
+        with filedialog.askopenfile("r", defaultextension=".json", filetypes=[('JSON file', '.json')], initialdir="./saves") as file:
             j_file = json.loads(file.read())
 
             # Clears the current track, and adds new tracks from the json file
