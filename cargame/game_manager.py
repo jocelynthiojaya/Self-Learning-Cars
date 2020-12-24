@@ -7,6 +7,7 @@ import cargame.util as util
 import arcade
 import json
 from os import mkdir
+from time import time
 
 from tkinter import filedialog, Tk
 
@@ -169,7 +170,7 @@ class MainGame:
     def switch_run_sim(self):
         # Run the simulation!
         self.state = 4
-        self.car_manager = CarManager(self.track_manager, *self.car_spawn, direction=self.car_angle, count=20)
+        self.car_manager = CarManager(self.track_manager, *self.car_spawn, direction=self.car_angle, count=g.conf["car_count"])
 
         # Enable zoom
         self.cam.set_can_zoom(True)
@@ -180,6 +181,7 @@ class MainGame:
     def update(self, delta):
         """ Will be run every frame """
         # Update the camera at the start
+        # start = time()
         self.cam.on_start_update()
         
         # Updates the delta time on globals
@@ -191,9 +193,11 @@ class MainGame:
         # Update the cars if state is run simulation
         if self.state == 4:
             self.car_manager.update()
+        # print("update_time: {}ms".format(round((time() - start) * 1000, 2)))
 
     def on_draw(self):
         # Clear the screen and start drawing
+        # start = time()
         arcade.start_render()
 
         # Draws the grid
@@ -203,17 +207,16 @@ class MainGame:
         self.track_manager.on_draw()
 
         # Draw the car spawn point and arrow
-        arcade.draw_text("Car spawn", self.car_spawn[0] - 29, self.car_spawn[1] + 18, (0, 0, 0))
         arcade.draw_arc_filled(*self.car_spawn, 32, 32, (132, 36, 140), -60, 240)
         util.draw_arrow(*self.car_spawn, 45, self.car_angle, (235, 174, 45), 4, 16)
 
-        # Draws all the car if simulation is runned
-        if self.state == 4:
-            self.car_manager.on_draw()
-
         camx, _, camy, _ = arcade.get_viewport()
 
-        if self.state == 1:
+        if self.state == 0:
+            # Show where the car spawn
+            arcade.draw_text("Car spawn", self.car_spawn[0] - 29, self.car_spawn[1] + 18, (0, 0, 0))
+
+        elif self.state == 1:
             # Draw instruction
             arcade.draw_text("Press [LEFT MOUSE] to add road, [ENTER] to add the roads, [ESC] to quit this mode.", camx + 5, camy + 5, (0, 0, 0))
             
@@ -224,19 +227,24 @@ class MainGame:
             if len(self.temp_road) > 0:
                 arcade.draw_line(*self.temp_road[-1], self.mx + camx, self.my + camy, (0, 0, 120), 5)
         
-        if self.state == 2:
+        elif self.state == 2:
             # Instruction
             arcade.draw_text("[LEFT MOUSE] on the walls to delete them, [ESC] to quit this mode.", camx + 5, camy + 5, (0, 0, 0))
 
-        if self.state == 3:
+        elif self.state == 3:
             # Instruction
             arcade.draw_text("[LEFT MOUSE] to set where the cars will spawn, [SCROLL MOUSE] to change spawn direction, [ESC] to quit this mode.", camx + 5, camy + 5, (0, 0, 0))
 
             # Draw the arrow
             util.draw_arrow(self.mx + camx, self.my + camy, 45, self.temp_car_angle, (75, 187, 189), 4, 16)
 
+        elif self.state == 4:
+            # Draws all the car if simulation is runned
+            self.car_manager.on_draw()
+
         # Draws the UI, and update viewport
         self.ui.on_draw()
+        # print("draw_time: {}ms".format(round((time() - start) * 1000, 2)))
         self.cam.update_viewport()
 
     def on_mouse_drag(self, x: float, y: float, dx: float, dy: float, buttons: int, modifiers: int):
@@ -273,11 +281,11 @@ class MainGame:
                 self.track_manager.add_track(self.temp_road)
                 self.temp_road = []
 
-        if self.state == 2:
+        elif self.state == 2:
             if symbol == arcade.key.ESCAPE:
                 self.switch_build_mode()
 
-        if self.state == 3:
+        elif self.state == 3:
             if symbol == arcade.key.ESCAPE:
                 self.switch_build_mode()
 
@@ -291,12 +299,12 @@ class MainGame:
                     # Add a new road to the temp_road
                     self.temp_road.append([camx + x, camy + y])
 
-            if self.state == 2:
+            elif self.state == 2:
                 if button == arcade.MOUSE_BUTTON_LEFT:
                     # Delete the road intersecting within the cursor.
                     self.track_manager.del_track_at_pos(camx + x, camy + y, 5)
 
-            if self.state == 3:
+            elif self.state == 3:
                 if button == arcade.MOUSE_BUTTON_LEFT:
                     # Delete the road intersecting within the cursor.
                     self.car_spawn = [camx + x, camy + y]
