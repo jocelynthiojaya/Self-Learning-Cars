@@ -188,11 +188,12 @@ class MainGame:
         g.delta = delta
 
         g.ui_text += self.fps_text
-        self.ui.set_text(g.ui_text.strip())
 
         # Update the cars if state is run simulation
         if self.state == 4:
             self.car_manager.update()
+
+        self.ui.set_text(g.ui_text.strip())
         # print("update_time: {}ms".format(round((time() - start) * 1000, 2)))
 
     def on_draw(self):

@@ -10,5 +10,6 @@
     "col_grid_size": 128,
 
     "car_count": 20,
-    "gen_duration": 20
+    "gen_duration": 20,
+    "gen_mutation": 0.15
 }

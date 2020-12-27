@@ -6,15 +6,16 @@ import cargame.globals as g
 
 from time import time
 from carbrain.neuralnetwork import NeuralNetwork
+from carbrain.geneticAlgorithm import geneticAlgorithm
 from random import randint, random
 
 # The sensor of the cars. Is an array of point pairs
 CAR_SENSOR = [
-        [30, 0], [100, 0],
-        [25, 10], [65, 50],
-        [25, -10], [65, -50],
-        [20, 10], [20, 50],
-        [20, -10], [20, -50]
+        [30, 0], [120, 0],
+        [25, 10], [75, 60],
+        [25, -10], [75, -60],
+        [20, 10], [30, 60],
+        [20, -10], [30, -60]
     ]
 
 class Car:
@@ -45,7 +46,7 @@ class Car:
     # Calculate distance fitness every x seconds
     fit_calc = 3
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, weights=None):
         """ Inits the car """
         # The coordinates of the origin point
 
@@ -98,7 +99,7 @@ class Car:
         self.accel = 0
 
         # Car's weights
-        self.weights = np.array([random() for _ in range(38)])
+        self.weights = np.array([random() for _ in range(38)]) if weights == None else weights
         
         # Car's neural network
         self.neuralnetwork = NeuralNetwork(self.weights)
@@ -113,9 +114,6 @@ class Car:
 
         # Helper to calculate the coordinates
         self.fit_last_coords = [x, y]
-
-    def reset_gen(self): 
-        """ use this function to reset every generation """
 
     def update(self):
         """ Update every frame """
@@ -315,18 +313,43 @@ class CarManager:
         for _ in range(count):
             car = Car(x_begin, y_begin)
             car.rotate(direction)
-            car.set_speed(randint(30, 70))
-            car.set_wheel((random()*0.3) - 0.15)
             self.insert_car(car)
 
         # Fit timer for calculating the distance of every car.
-        self.fit_timer = 0
+        self.fit_timer = 0.0
 
         # Fit list that contains a list of index and fit [[car_index, fit], ...]
         self.fit_list = []
 
         # List containing 2 values, containing the best cars in each checks. Contains the index
-        self.best_fit = [0, 0]
+        self.best_fit = [randint(0, g.conf["car_count"]-1), randint(0, g.conf["car_count"]-1)]
+
+        # Duration left in a generation.
+        self.generation_timer = g.conf["gen_duration"]
+
+        # Iteration count
+        self.iteration = 1
+
+    def reset_gen(self): 
+        """ use this function to reset every generation """
+        # Reset everything
+        self.fit_timer = 0.0
+        self.best_fit = [randint(0, g.conf["car_count"]-1), randint(0, g.conf["car_count"]-1)]
+        self.generation_timer = g.conf["gen_duration"]
+        self.iteration += 1
+
+        # Create a new batch of cars based on the best ones.
+        new_cars = []
+        for _ in range(g.conf["car_count"]):
+            # Generate new set of weights using the genetic algorithm
+            gen_alg = geneticAlgorithm(self.cars[self.best_fit[0]].weights, self.cars[self.best_fit[1]].weights)
+
+            # Get the new weights
+            new_cars.append(Car(self.x_begin, self.y_begin, list(gen_alg.mutation(g.conf["gen_mutation"])[0])))
+
+        # Replace the current cars
+        del self.cars[:]
+        self.cars = new_cars
 
     def insert_car(self, car):
         self.cars.append(car)
@@ -343,8 +366,13 @@ class CarManager:
 
         if self.draw_sensor: self.collision_points = []
 
-        # Calculate the delta of fit_timer
+        # Calculate the delta of fit_timer and generation timer
         self.fit_timer += g.delta
+        self.generation_timer -= g.delta
+
+        # If the timer is up, then go to the next generation.
+        if self.generation_timer <= 0:
+            self.reset_gen()
 
         # Determine whether the fitness of each car will be calculated in this frame.
         calc_fit = False
@@ -453,7 +481,7 @@ class CarManager:
             # Calculate fit based on the normalized value from the distance fit,
             # and the speed of the car.
             fit_final = list(map(
-                lambda x : [x[0], (x[1]/max_fit) + self.cars[x[0]].speed/Car.max_speed],
+                lambda x : [x[0], (x[1]/max_fit) + self.cars[x[0]].speed/Car.max_speed * 0.5],
                 self.fit_list
             ))
             fit_final.sort(key=lambda x: x[1], reverse=True)
@@ -465,7 +493,7 @@ class CarManager:
             for i in range(len(self.cars)):
                 self.cars[i].car_color = arcade.color.ALLOY_ORANGE if i in self.best_fit else (arcade.color.BLUE_SAPPHIRE if self.cars[i].active else arcade.color.RED_DEVIL)
 
-        # g.ui_text += "Active cars:{}\nCollChecks:{}\nH-CollChecks:{}\n".format(counter, coll_checks, hcoll_checks)
+        g.ui_text += "Time Left: {}\nIteration: {}\n".format(round(self.generation_timer), self.iteration)
         # print("col_time: {}ms".format(round((time() - start) * 1000, 2)))
     
     def update(self):
