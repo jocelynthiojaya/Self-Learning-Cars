@@ -11,11 +11,11 @@ from random import randint, random
 
 # The sensor of the cars. Is an array of point pairs
 CAR_SENSOR = [
-        [30, 0], [120, 0],
-        [25, 10], [75, 60],
-        [25, -10], [75, -60],
-        [20, 10], [30, 60],
-        [20, -10], [30, -60]
+        [30, 0], [140, 0],
+        [25, 10], [80, 70],
+        [25, -10], [80, -70],
+        [20, 10], [35, 65],
+        [20, -10], [35, -65]
     ]
 
 class Car:
@@ -332,12 +332,6 @@ class CarManager:
 
     def reset_gen(self): 
         """ use this function to reset every generation """
-        # Reset everything
-        self.fit_timer = 0.0
-        self.best_fit = [randint(0, g.conf["car_count"]-1), randint(0, g.conf["car_count"]-1)]
-        self.generation_timer = g.conf["gen_duration"]
-        self.iteration += 1
-
         # Create a new batch of cars based on the best ones.
         new_cars = []
         for _ in range(g.conf["car_count"]):
@@ -350,6 +344,12 @@ class CarManager:
         # Replace the current cars
         del self.cars[:]
         self.cars = new_cars
+
+        # Reset everything
+        self.fit_timer = 0.0
+        self.best_fit = [randint(0, g.conf["car_count"]-1), randint(0, g.conf["car_count"]-1)]
+        self.generation_timer = g.conf["gen_duration"]
+        self.iteration += 1
 
     def insert_car(self, car):
         self.cars.append(car)

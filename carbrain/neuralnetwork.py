@@ -20,17 +20,15 @@ class NeuralNetwork:
         self.matrixdef(self.weights)
         layer1 = np.dot(input, self.matrix1)
         layer2 = np.dot(layer1, self.matrix2)
-        output = self.sigmoid(np.dot(layer2, self.matrix3)-4)
+        output = self.sigmoid(np.dot(layer2, self.matrix3)-3.5)
         #print(output)
         return output
     
 #arr = [0,4,2,4,4,2,6,1,6,1,4,5,7,1,3,2,7,2,6,2,5,2,5,
 #            5,1,5,5,8,3,0,1,2,3,1,2,8,1,9]
 #arr =  np.array([random() for _ in range(38)])
-#inputvalue = np.array([random() for _ in range(5)])
 
 #neural1 = NeuralNetwork(inputvalue, arr)
 #print("input value: \n", inputvalue)
 #print("weights array: \n", arr)
 #print("output layer: \n", neural1.feedforward())
-

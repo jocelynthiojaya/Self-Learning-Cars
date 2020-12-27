@@ -73,9 +73,9 @@ class MainGame:
         self.sim_ui.buttons = [
             ui.Button("Play", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 50, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), lambda : self.pause_sim(False), "./cargame/sprites/play.png"),
             ui.Button("Pause", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 120, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), lambda : self.pause_sim(True), "./cargame/sprites/pause.png"),
-            ui.Button("Skip", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), lambda : print("Bruh"), "./cargame/sprites/skip.png"),
-            ui.Button("Exit Sim", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 260, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), self.switch_build_mode, "./cargame/sprites/exit.png"),
-            ui.Button("Save Car", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 330, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), lambda : print("Bruh"), "./cargame/sprites/savecar.png")
+            ui.Button("Skip", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 190, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), lambda : self.car_manager.reset_gen(), "./cargame/sprites/skip.png"),
+            ui.Button("Exit Sim", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 260, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), self.switch_build_mode, "./cargame/sprites/exit.png")
+            # ui.Button("Save Car", g.conf["screen_width"]/2 - ui.UI_WIDTH/2 + 330, ui.Y_UI_CENTER, (96, 59, 217), (86, 50, 201), lambda : print("Bruh"), "./cargame/sprites/savecar.png")
         ]
 
         # There are 2 build ui buttons. This is so that the user can scroll through a button list.
