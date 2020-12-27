@@ -8,7 +8,8 @@ conf = {
     "c_bound_bottom": -4000,
     "c_bound_top": 4000,
     "col_grid_size": 128,
-    "car_count": 20
+    "car_count": 20,
+    "gen_duration": 20
 }
 
 # Delta timing on the frames

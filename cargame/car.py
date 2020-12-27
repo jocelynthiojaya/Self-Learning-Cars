@@ -42,6 +42,9 @@ class Car:
     # This is in pixel per second
     max_speed = 100
 
+    # Calculate distance fitness every x seconds
+    fit_calc = 3
+
     def __init__(self, x, y):
         """ Inits the car """
         # The coordinates of the origin point
@@ -100,8 +103,19 @@ class Car:
         # Car's neural network
         self.neuralnetwork = NeuralNetwork(self.weights)
 
-        # Car's state
+        # Car's state. If true, then the car will be calculated in collisions
         self.active = True
+
+        # Car fitness for genetic algorithm
+        # The means that is calculates the fitness is through the distance traveled.
+        # Distance traveled is counted every x seconds from the start, calculating distance from the previous.
+        self.fit = 0.0
+
+        # Helper to calculate the coordinates
+        self.fit_last_coords = [x, y]
+
+    def reset_gen(self): 
+        """ use this function to reset every generation """
 
     def update(self):
         """ Update every frame """
@@ -305,6 +319,15 @@ class CarManager:
             car.set_wheel((random()*0.3) - 0.15)
             self.insert_car(car)
 
+        # Fit timer for calculating the distance of every car.
+        self.fit_timer = 0
+
+        # Fit list that contains a list of index and fit [[car_index, fit], ...]
+        self.fit_list = []
+
+        # List containing 2 values, containing the best cars in each checks. Contains the index
+        self.best_fit = [0, 0]
+
     def insert_car(self, car):
         self.cars.append(car)
 
@@ -320,20 +343,39 @@ class CarManager:
 
         if self.draw_sensor: self.collision_points = []
 
+        # Calculate the delta of fit_timer
+        self.fit_timer += g.delta
+
+        # Determine whether the fitness of each car will be calculated in this frame.
+        calc_fit = False
+        if self.fit_timer > Car.fit_calc:
+            self.fit_timer -= Car.fit_calc
+            calc_fit = True
+
+            # Reset list
+            self.fit_list = []
+
         # Grid size
         size = g.conf["col_grid_size"]
         # start = time()
 
         # Counter for the cars
-        coll_checks = 0
-        hcoll_checks = 0
         counter = 0
         for car in self.cars:
             # We check first if the car is active.
             # If its not, move on to the next car.
+            counter += 1
+
+            # Calculate the fitness, if it's determined to be calculated this frame.
+            if calc_fit:
+                # Only calculate if car is active
+                if car.active:
+                    car.fit += distance(car.x, car.y, *car.fit_last_coords)
+                    car.fit_last_coords = [car.x, car.y]
+                self.fit_list.append([counter - 1, car.fit])
+
             if not car.active:
                 continue
-            counter += 1
 
             # Update the car vars
             car.update()
@@ -361,10 +403,8 @@ class CarManager:
                             # Check the AABB of the current car and the destination object
                             if col.rectrect(x1, y1, x2, y2, *col.correct_bounding_box(obj[0], obj[1], obj[2], obj[3])):
                                 # AABB collision detected
-                                coll_checks += 1
                                 if col.linepoly(obj[0], obj[1], obj[2], obj[3], f_poly):
                                     collision = True
-                                    hcoll_checks += 1
                                 break
 
             # Move the car if collision is not detected.
@@ -396,10 +436,8 @@ class CarManager:
                             if col.rectrect(x1, y1, x2, y2, *col.correct_bounding_box(*obj)):
                                 # print("Sensor {}:".format(s), *sensor, *obj)
                                 # Find the line intersection.
-                                coll_checks += 1
                                 intersection = col.lineline(*sensor, *obj, True)
                                 if intersection:
-                                    hcoll_checks += 1
                                     # Add the sensor data to the car object.
                                     car.sensors[s] = distance(sensor[0], sensor[1], *intersection, True) / Car.sensor_max_dist[s]
                                     collision = True
@@ -408,6 +446,24 @@ class CarManager:
                 # Draw the dot at the tip of the sensor if collision is not detected.
                 if self.draw_sensor and not collision:
                     self.collision_points.append([sensor[2], sensor[3]])
+
+        if calc_fit:
+            max_fit = max(self.fit_list, key=lambda x : x[1])[1]
+
+            # Calculate fit based on the normalized value from the distance fit,
+            # and the speed of the car.
+            fit_final = list(map(
+                lambda x : [x[0], (x[1]/max_fit) + self.cars[x[0]].speed/Car.max_speed],
+                self.fit_list
+            ))
+            fit_final.sort(key=lambda x: x[1], reverse=True)
+
+            # Set the best fit
+            self.best_fit = [fit_final[0][0], fit_final[1][0]]
+            
+            # Change the color according the best.
+            for i in range(len(self.cars)):
+                self.cars[i].car_color = arcade.color.ALLOY_ORANGE if i in self.best_fit else (arcade.color.BLUE_SAPPHIRE if self.cars[i].active else arcade.color.RED_DEVIL)
 
         # g.ui_text += "Active cars:{}\nCollChecks:{}\nH-CollChecks:{}\n".format(counter, coll_checks, hcoll_checks)
         # print("col_time: {}ms".format(round((time() - start) * 1000, 2)))
