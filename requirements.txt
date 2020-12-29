@@ -2,3 +2,4 @@ arcade
 
 # Numpy 1.19.4 (The latest one as of 3-12-2020) bugs in windows 10 2004, use one version below.
 numpy==1.19.3
+pyinstaller
