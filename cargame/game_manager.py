@@ -150,16 +150,19 @@ class MainGame:
 
     def switch_add_wall_mode(self):
         # Helper function to change the game state to wall mode, disable zoom.
+        self.temp_road = []
         self.state = 1
         self.cam.set_can_zoom(False)
 
     def switch_del_wall_mode(self):
         # Mode when deleting wall, disable zoom
+        self.temp_road = []
         self.state = 2
         self.cam.set_can_zoom(False)
     
     def switch_set_car_spawn(self):
         # Set the mode for setting car spawn
+        self.temp_road = []
         self.state = 3
         self.cam.set_can_zoom(False)
         
