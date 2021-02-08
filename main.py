@@ -23,7 +23,7 @@ if path.exists(CONF_PATH) and path.isfile(CONF_PATH):
 else:
     # If file does not exist, then create it based on the default values.
     with open(CONF_PATH, "w+") as file:
-        file.write(json.dumps(g.conf))
+        file.write(json.dumps(g.conf, indent=2))
 
 # Run the game
 game.run_game()
